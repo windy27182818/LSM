@@ -1,0 +1,243 @@
+﻿@model IEnumerable<LeaveManagementSystem.Models.ClaimRequest>
+
+@{
+    ViewData["Title"] = "Claim Management";
+}
+
+<div class="container mt-4 leave-container">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">Entitlement Management</h2>
+            <small class="text-muted">Manage employee reimbursement cycles</small>
+        </div>
+
+        @* [路由修正] 指向 Form Action *@
+        <a asp-action="Create" class="btn btn-warning fw-semibold text-white" style="background-color:#d4a017; border-color:#d4a017;">
+            <i class="bi bi-plus-lg me-1"></i> New Claim Request
+        </a>
+    </div>
+
+    @* 提示信息 *@
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Employee</th>
+                            <th class="text-center">Eligibility Status</th>
+                            <th>Claim Type</th>
+                            <th class="text-end">Amount</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Doc</th>
+                            <th>Request Date</th>
+                            <th class="text-center pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                // 员工资格信息（只对 Business Trip 有意义）
+                                bool hasEmployee = item.Employee != null;
+                                bool isEligible = hasEmployee && item.Employee!.IsEligible;
+                                DateTime? nextEligibleDate = item.Employee?.NextEligibleDate;
+
+                                // 当前行是否为 Business Trip
+                                bool isBusinessTrip = item.ClaimType?.Name == "Business Trip";
+
+                                <tr>
+                                    <td class="ps-4 fw-medium">@item.Employee?.Name</td>
+
+                                    <td class="text-center">
+                                        @if (isBusinessTrip)
+                                        {
+                                            @* 只针对 Business Trip 显示三年一次的资格 *@
+                                            if (isEligible)
+                                            {
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3">
+                                                    <i class="bi bi-unlock-fill me-1"></i> Eligible
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                var tooltip = nextEligibleDate.HasValue
+                                                ? $"Next Eligible: {nextEligibleDate.Value:yyyy-MM-dd}"
+                                                : "Not eligible yet";
+
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3"
+                                                      title="@tooltip">
+                                                    <i class="bi bi-lock-fill me-1"></i> No Eligible
+                                                </span>
+
+                                                if (nextEligibleDate.HasValue)
+                                                {
+                                                    <div class="text-muted small mt-1">
+                                                        Next: @nextEligibleDate.Value.ToString("dd/MM/yyyy")
+                                                    </div>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Eligible
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>@item.ClaimType?.Name</td>
+
+                                    <td class="text-end fw-bold text-dark">
+                                        @item.Amount.ToString("C")
+                                    </td>
+
+                                    <td class="text-center">
+                                        @{
+                                            string status = item.Status;
+                                            string badgeClass = status switch
+                                            {
+                                                "Approved" => "bg-success",
+                                                "Rejected" => "bg-danger",
+                                                _ => "bg-warning text-dark"
+                                            };
+                                        }
+                                        <span class="badge rounded-pill @badgeClass px-3">@status</span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(item.Receipt))
+                                        {
+                                            <a href="javascript:void(0);"
+                                               class="text-decoration-none"
+                                               onclick="showReceipt('@item.Receipt', '@item.Employee?.Name - Receipt')"
+                                               title="View Receipt">
+                                                <i class="bi bi-receipt fs-4 text-primary"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted opacity-25" title="No Receipt">
+                                                <i class="bi bi-dash-lg fs-4"></i>
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="small text-muted">
+                                        @item.RequestDate.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td class="text-center pe-4">
+                                        @if (item.Status == "Pending")
+                                        {
+                                            <a asp-action="Form"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-warning btn-sm text-white"
+                                               style="background-color:#d4a017; border-color:#d4a017;">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="Form"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-light btn-sm text-muted border">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                                    No claim requests found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="receiptModalLabel">Receipt Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center bg-light p-4">
+                <img id="modalReceiptImage" src="" class="img-fluid shadow-sm rounded" style="max-height: 80vh; display:none;" alt="Receipt Evidence" />
+
+                <div id="modalPdfContainer" style="display:none;">
+                    <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 5rem;"></i>
+                    <p class="mt-3">This document is a PDF.</p>
+                    <a id="modalDownloadLink" href="#" class="btn btn-primary" download="receipt.pdf">
+                        <i class="bi bi-download me-1"></i> Download / Open PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showReceipt(base64Data, title) {
+            var img = document.getElementById('modalReceiptImage');
+            var pdfContainer = document.getElementById('modalPdfContainer');
+            var downloadLink = document.getElementById('modalDownloadLink');
+            var label = document.getElementById('receiptModalLabel');
+
+            label.textContent = title;
+
+            // 简单的 MIME 类型检测
+            var mimeType = "image/png"; // 默认
+            if (base64Data.startsWith("JVBERi")) {
+                mimeType = "application/pdf";
+            } else if (base64Data.startsWith("/9j/")) {
+                mimeType = "image/jpeg";
+            } else if (base64Data.startsWith("iVBORw0KGgo")) {
+                mimeType = "image/png";
+            }
+
+            var fullDataUri = "data:" + mimeType + ";base64," + base64Data;
+
+            if (mimeType === "application/pdf") {
+                img.style.display = "none";
+                pdfContainer.style.display = "block";
+                downloadLink.href = fullDataUri;
+            } else {
+                pdfContainer.style.display = "none";
+                img.style.display = "inline-block";
+                img.src = fullDataUri;
+            }
+
+            var myModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+            myModal.show();
+        }
+    </script>
+}

@@ -1,0 +1,153 @@
+﻿@using LeaveManagementSystem.ViewModels
+@model ClaimRequestFormViewModel
+
+@{
+    ViewData["Title"] = Model.Id == 0 ? "New Claim Request" : "Edit Claim Request";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">@ViewData["Title"]</h4>
+                        <div class="text-muted small">
+                            @(Model.Id == 0 ? "Submit a new reimbursement claim." : "Update your claim details.")
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Form" method="post" enctype="multipart/form-data">
+
+                        @* ✅ 关键：显示 Business Trip eligibility / Receipt required 等 “全局错误” *@
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+                        @* 隐藏字段：保持数据在 Post 时不丢失 *@
+                        <input type="hidden" asp-for="EmployeeId" />
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Receipt" />
+                        <input type="hidden" asp-for="Status" />
+                        <input type="hidden" asp-for="IsAdmin" />
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted small mb-3">Claim Information</h6>
+
+                            <div class="row g-3">
+                                @* 1. Employee *@
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">Employee</label>
+                                    <input class="form-control" asp-for="EmployeeName" readonly />
+                                </div>
+
+                                @* 2. Date *@
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">Date Created</label>
+                                    <input class="form-control" value="@Model.CreatedAt.ToString("dd/MM/yyyy")" readonly />
+                                </div>
+
+                                @* 3. Claim Type *@
+                                <div class="col-md-6">
+                                    <label asp-for="ClaimTypeId" class="form-label small text-muted">Claim Type</label>
+                                    <select asp-for="ClaimTypeId" class="form-select" asp-items="ViewBag.ClaimTypeList">
+                                        <option value="">-- Select Type --</option>
+                                    </select>
+                                    <span asp-validation-for="ClaimTypeId" class="text-danger small"></span>
+                                </div>
+
+                                @* 4. Amount *@
+                                <div class="col-md-6">
+                                    <label asp-for="Amount" class="form-label small text-muted">Amount ($)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger small"></span>
+                                </div>
+
+                                @* 5. Receipt Upload *@
+                                <div class="col-12">
+                                    <label class="form-label small text-muted">
+                                        Receipt / Invoice (Accepted formats: PDF, JPG, PNG (Max 2MB))
+                                        @if (Model.Id == 0)
+                                        {
+                                            <span class="text-danger fw-bold">*</span>
+                                        }
+                                    </label>
+
+                                    @* ✅ 如果已有附件：用 Controller 下载（更稳，不用 data-uri） *@
+                                    @if (!string.IsNullOrWhiteSpace(Model.Receipt) && Model.Id > 0)
+                                    {
+                                        <div class="mb-2 p-2 border rounded bg-light d-flex align-items-center">
+                                            <i class="bi bi-file-earmark-check text-success fs-4 me-2"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Current File Attached</small>
+                                                <a asp-controller="Claims"
+                                                   asp-action="DownloadReceipt"
+                                                   asp-route-id="@Model.Id"
+                                                   class="fw-bold small text-decoration-none">
+                                                    Download / View Existing
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @* ✅ name="file" 必须跟 Controller 参数一致 *@
+                                    <input type="file"
+                                           name="file"
+                                           class="form-control"
+                                           id="FileAttachment"
+                                           accept=".pdf,.png,.jpg,.jpeg" />
+
+                                    @* ✅ 关键：显示 “Receipt is required…” 这种后端 ModelState 错误 *@
+                                    <span asp-validation-for="Receipt" class="text-danger small"></span>
+
+                                    <div id="fileSizeError" class="text-danger small mt-1" style="display:none;"></div>
+                                </div>
+
+                                @* 6. Description *@
+                                <div class="col-12">
+                                    <label asp-for="Description" class="form-label small text-muted">Description</label>
+                                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter details..."></textarea>
+                                    <span asp-validation-for="Description" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary" style="min-width: 150px;">Back to List</a>
+                            <button type="submit" class="btn btn-warning text-white" style="min-width: 150px; background-color:#d4a017; border-color:#d4a017;">
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // 前端檔案大小檢查 (2MB)
+        document.getElementById("FileAttachment").addEventListener("change", function () {
+            const file = this.files[0];
+            const errorDiv = document.getElementById("fileSizeError");
+            errorDiv.style.display = "none";
+
+            if (file) {
+                const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+                if (file.size > maxSizeInBytes) {
+                    errorDiv.textContent = "File is too large. Max size is 2MB.";
+                    errorDiv.style.display = "block";
+                    this.value = ""; // 清空选择
+                }
+            }
+        });
+    </script>
+}

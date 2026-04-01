@@ -1,0 +1,158 @@
+﻿@model LeaveManagementSystem.Models.Employee
+@{
+    ViewData["Title"] = "Add Employee";
+}
+
+<h2 class="mb-3">Add Employee</h2>
+
+<form asp-controller="LeaveAdminEmployees" asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Department</label>
+                    <input asp-for="Department" class="form-control" />
+                    <span asp-validation-for="Department" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Employment Type</label>
+                    <input asp-for="EmploymentType" class="form-control" />
+                    <span asp-validation-for="EmploymentType" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Join Date</label>
+                    <input asp-for="JoinDate" type="date" class="form-control" />
+                    <span asp-validation-for="JoinDate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end justify-content-between">
+                    <div class="form-check">
+                        <input asp-for="IsAdmin" class="form-check-input" id="IsAdmin" />
+                        <label class="form-check-label" for="IsAdmin">Is Admin</label>
+                    </div>
+
+                    <!-- ✅ Role 只显示（不提交），真正保存由 Controller 写入 -->
+                    <div class="text-muted small">
+                        Role: <span id="rolePreview" class="fw-semibold">Staff</span>
+                    </div>
+                </div>
+
+                <!-- ✅ Password -->
+                <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <!-- ✅ ConfirmPassword -->
+                <div class="col-md-6">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                    <span class="text-danger small">@Html.ValidationMessage("ConfirmPassword")</span>
+                </div>
+
+            </div>
+
+            <hr class="my-4" />
+
+            <!-- ✅ 新增：Leave Entitlement Setup -->
+            <h5 class="mb-3">Leave Entitlement Setup</h5>
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">Annual Leave (days)</label>
+                    <input asp-for="AnnualLeaveEntitlement" class="form-control" />
+                    <span asp-validation-for="AnnualLeaveEntitlement" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Sick Leave (days)</label>
+                    <input asp-for="SickLeaveEntitlement" class="form-control" />
+                    <span asp-validation-for="SickLeaveEntitlement" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Hospitalisation (days)</label>
+                    <input asp-for="HospitalisationLeaveEntitlement" class="form-control" />
+                    <span asp-validation-for="HospitalisationLeaveEntitlement" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Maternity (days)</label>
+                    <input asp-for="MaternityLeaveEntitlement" class="form-control" />
+                    <span asp-validation-for="MaternityLeaveEntitlement" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Paternity (days)</label>
+                    <input asp-for="PaternityLeaveEntitlement" class="form-control" />
+                    <span asp-validation-for="PaternityLeaveEntitlement" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Bereavement (days)</label>
+                    <input asp-for="BereavementLeaveEntitlement" class="form-control" />
+                    <span asp-validation-for="BereavementLeaveEntitlement" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Unpaid (days)</label>
+                    <input asp-for="UnpaidLeaveEntitlement" class="form-control" />
+                    <span asp-validation-for="UnpaidLeaveEntitlement" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-text mt-4">
+                        The balance will be automatically initialized when stored：<br />
+                        Used = 0，Balance = Entitlement
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card-footer bg-white d-flex justify-content-between">
+            <a class="btn btn-secondary" asp-controller="LeaveAdminEmployees" asp-action="Index">Back</a>
+            <button type="submit" class="btn btn-warning px-4">Save</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function updateRolePreview() {
+            const isAdmin = document.getElementById("IsAdmin");
+            const rolePreview = document.getElementById("rolePreview");
+            if (!isAdmin || !rolePreview) return;
+
+            rolePreview.textContent = isAdmin.checked ? "Administrator" : "Staff";
+        }
+
+        document.getElementById("IsAdmin")?.addEventListener("change", updateRolePreview);
+
+        window.addEventListener("load", updateRolePreview);
+    </script>
+}

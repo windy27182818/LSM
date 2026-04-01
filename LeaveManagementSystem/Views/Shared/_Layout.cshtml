@@ -1,0 +1,279 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    // ✅ 防止某些页面没有设置 ViewBag.IsAdmin / ViewBag.IsBoss 导致崩溃
+    bool isAdmin = User?.IsInRole("Admin") ?? false;
+    bool isBoss = User?.IsInRole("Boss") ?? false;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LeaveManagementSystem</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/LeaveManagementSystem.styles.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <div class="app-layout d-flex">
+
+        <aside class="app-sidebar d-flex flex-column">
+            <div class="sidebar-header d-flex align-items-center">
+                <img src="~/images/logo.png" alt="Company Logo" class="sidebar-logo" />
+                <div class="sidebar-title ms-2">
+                    <div class="fw-semibold">JDS</div>
+                    <small class="text-muted">LMS</small>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav flex-grow-1 mt-3 mb-auto">
+
+                <a asp-controller="LeaveRequests"
+                   asp-action="Index"
+                   class="sidebar-link @(currentController == "LeaveRequests" ? "active" : "")">
+                    <i class="bi bi-list-check me-2"></i>
+                    <span>Leave Requests</span>
+                </a>
+
+                @{
+                    bool isDashboardSection =
+                    currentController == "Home" &&
+                    (currentAction == "Dashboard" || currentAction == "ClaimDashboard");
+                }
+
+                <a class="sidebar-link d-flex justify-content-between align-items-center @(isDashboardSection ? "active" : "")"
+                   data-bs-toggle="collapse"
+                   href="#dashboardMenu"
+                   role="button"
+                   aria-expanded="@(isDashboardSection ? "true" : "false")"
+                   aria-controls="dashboardMenu"
+                   data-bs-parent=".sidebar-nav">
+                    <span>
+                        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                    </span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+
+                <div class="collapse @(isDashboardSection ? "show" : "")" id="dashboardMenu" data-bs-parent=".sidebar-nav">
+                    <div class="d-flex flex-column ms-4 mt-1">
+                        <a asp-controller="Home"
+                           asp-action="Dashboard"
+                           class="sidebar-link py-2 @(currentController == "Home" && currentAction == "Dashboard" ? "active" : "")">
+                            Leave Dashboard
+                        </a>
+
+                        <a asp-controller="Home"
+                           asp-action="ClaimDashboard"
+                           class="sidebar-link py-2 @(currentController == "Home" && currentAction == "ClaimDashboard" ? "active" : "")">
+                            Claim Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <a asp-controller="Home"
+                   asp-action="Calendar"
+                   class="sidebar-link @(currentController == "Home" && currentAction == "Calendar" ? "active" : "")">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    <span>Leave Calendar</span>
+                </a>
+
+                <a asp-controller="Profile"
+                   asp-action="Index"
+                   class="sidebar-link @(currentController == "Profile" ? "active" : "")">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span>User Profile</span>
+                </a>
+
+                <a asp-controller="Claims"
+                   asp-action="Index"
+                   class="sidebar-link @(currentController == "Claims" ? "active" : "")">
+                    <i class="bi bi-cash-coin me-2"></i>
+                    <span>Entitlement</span>
+                </a>
+
+                @* ✅ Admin menu: Admin 或 Boss 都要看得到 *@
+                @if (isAdmin || isBoss)
+                {
+                    var isLeaveAdmin = currentController == "LeaveAdmin" || currentController == "LeaveAdminEmployees";
+
+                    <a class="sidebar-link d-flex justify-content-between align-items-center @(isLeaveAdmin ? "active" : "")"
+                       data-bs-toggle="collapse"
+                       href="#leaveAdminMenu"
+                       role="button"
+                       aria-expanded="@(isLeaveAdmin ? "true" : "false")">
+                        <span>
+                            <i class="bi bi-gear me-2"></i>Admin
+                        </span>
+                        <i class="bi bi-chevron-down small"></i>
+                    </a>
+
+                    <div class="collapse @(isLeaveAdmin ? "show" : "")" id="leaveAdminMenu">
+                        <div class="d-flex flex-column ms-4 mt-1">
+
+                            <a asp-controller="LeaveAdmin" asp-action="Index"
+                               class="sidebar-link py-2 @((currentController == "LeaveAdmin" && currentAction == "Index") ? "active" : "")">
+                                Leave List
+                            </a>
+
+                            <a asp-controller="LeaveAdmin" asp-action="ApprovedList"
+                               class="sidebar-link py-2 @((currentController == "LeaveAdmin" && currentAction == "ApprovedList") ? "active" : "")">
+                                Leave Approved List
+                            </a>
+
+                            <a asp-controller="LeaveAdminEmployees" asp-action="Index"
+                               class="sidebar-link py-2 @((currentController == "LeaveAdminEmployees" && currentAction == "Index") ? "active" : "")">
+                                Employees
+                            </a>
+
+                        </div>
+                    </div>
+                }
+
+            </nav>
+
+            <!-- ✅ Logout -->
+            <div class="mt-auto">
+                <div class="border-top my-2 mx-3"></div>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                        <button type="submit" class="sidebar-link w-100 border-0 bg-transparent text-start">
+                            <i class="bi bi-box-arrow-left me-2"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="sidebar-link">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        <span>Login</span>
+                    </a>
+                }
+            </div>
+        </aside>
+
+        <div class="app-main d-flex flex-column flex-grow-1">
+            <header class="app-topbar border-bottom bg-white">
+                <div class="px-4 py-2 d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">JDS Employee Leave Management System</span>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="text-muted small">
+                            Welcome, <strong>@User.Identity.Name</strong>
+                        </div>
+                    }
+                </div>
+            </header>
+
+            <main role="main" class="flex-grow-1">
+                <div class="container py-4">
+
+                    @* ===============================
+                       ✅ Flash Messages (避免串台)
+                       - Leave:  LeaveSuccess / LeaveError
+                       - Claim:  ClaimSuccess / ClaimError
+                       - Global: GlobalSuccess / GlobalError
+                       =============================== *@
+
+                    @* ✅ Global messages *@
+                    @if (TempData["GlobalSuccess"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-1"></i>
+                            @TempData["GlobalSuccess"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["GlobalError"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            @TempData["GlobalError"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @* ✅ Leave scope messages *@
+                    @if (currentController == "LeaveRequests" && TempData["LeaveSuccess"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-1"></i>
+                            @TempData["LeaveSuccess"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (currentController == "LeaveRequests" && TempData["LeaveError"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            @TempData["LeaveError"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @* ✅ Claim scope messages *@
+                    @if (currentController == "Claims" && TempData["ClaimSuccess"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle me-1"></i>
+                            @TempData["ClaimSuccess"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (currentController == "Claims" && TempData["ClaimError"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            @TempData["ClaimError"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <script>
+            (function () {
+                var idleTimeout = 3 * 60 * 1000;
+                var idleTimer = null;
+
+                function resetIdleTimer() {
+                    if (idleTimer) {
+                        clearTimeout(idleTimer);
+                    }
+
+                    idleTimer = setTimeout(function () {
+                        window.location.href = '@Url.Action("AutoLogout", "Account")';
+                    }, idleTimeout);
+                }
+
+                document.addEventListener("mousemove", resetIdleTimer);
+                document.addEventListener("keydown", resetIdleTimer);
+                document.addEventListener("click", resetIdleTimer);
+                document.addEventListener("scroll", resetIdleTimer);
+                document.addEventListener("touchstart", resetIdleTimer);
+
+                window.addEventListener("load", resetIdleTimer);
+            })();
+        </script>
+    }
+</body>
+</html>

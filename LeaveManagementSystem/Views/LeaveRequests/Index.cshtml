@@ -1,0 +1,178 @@
+﻿@model IEnumerable<LeaveManagementSystem.ViewModels.LeaveRequestListVM>
+
+@{
+    ViewData["Title"] = "Leave Requests";
+    bool isAdmin = ViewBag.IsAdmin != null && (bool)ViewBag.IsAdmin;
+    var userIdClaim = User.FindFirst("UserId")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int userId = 0;
+
+    if (!string.IsNullOrEmpty(userIdClaim))
+    {
+        int.TryParse(userIdClaim, out userId);
+    }
+}
+
+<div class="container mt-4 leave-container">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">Leave Requests</h2>
+        </div>
+            <a asp-action="Create" class="btn btn-warning fw-semibold text-white" style="background-color:#d4a017; border-color:#d4a017;">
+                <i class="bi bi-plus-lg me-1"></i> New Leave Request
+            </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Employee</th>
+                            <th>Leave Type</th>
+                            <th class="text-center">Period</th>
+                            <th class="text-center">Total Days</th>
+                            <!-- NEW: Request Type column -->
+                            <th class="text-center">Request Type</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Doc</th>
+                            <th>Created At</th>
+                            <th class="text-center pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-medium">@item.EmployeeName</td>
+                                    <td>@item.LeaveTypeName</td>
+                                    <td class="text-center text-muted small">
+                                        @item.StartDate.ToString("dd/MM/yyyy") - @item.EndDate.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td class="text-center">@item.TotalDays</td>
+
+                                    <td class="text-center">
+                                        @if (item.IsSpecialRequest)
+                                        {
+                                            <span class="badge bg-warning text-dark">Special Request</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Normal</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        @{
+                                            var status = item.Status ?? "Pending";
+                                            var badgeClass = status switch
+                                            {
+                                                "Approved" => "bg-success",
+                                                "Rejected" => "bg-danger",
+                                                _ => "bg-warning text-dark"
+                                            };
+                                        }
+                                        <span class="badge rounded-pill @badgeClass px-3">@status</span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(item.AttachmentPath))
+                                        {
+                                            <a asp-action="DownloadAttachment"
+                                               asp-controller="LeaveRequests"
+                                               asp-route-id="@item.Id"
+                                               class="text-decoration-none"
+                                               target="_blank"
+                                               download
+                                               title="Download Attachment">
+                                                <i class="bi bi-file-earmark-pdf-fill text-danger fs-4"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted opacity-25">
+                                                <i class="bi bi-file-earmark"></i>
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="small text-muted">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+
+                                    <td class="text-center pe-4">
+                                        @if (item.Status == "Pending")
+                                        {
+                                            <a asp-action="Edit"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-warning btn-sm text-white"
+                                               style="background-color:#d4a017; border-color:#d4a017;">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                                    No leave requests found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    var basePath = Context.Request.PathBase.Value ?? "";
+}
+
+<script>
+(function () {
+    const btn = document.getElementById("btnPushTest");
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = "Sending...";
+
+        try {
+            const payload = {
+                devicetoken: ["c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75"],
+                message: "LMS Test Push from Leave Requests",
+                jobcount: "1"
+            };
+
+            const apiUrl = "@basePath/api/push/test";
+
+            const res = await fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const text = await res.text();
+            if (!res.ok) throw new Error(text || "Push failed");
+
+            alert("✅ Push sent!\n\n" + text);
+        } catch (err) {
+            console.error(err);
+            alert("❌ Push failed:\n" + err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    });
+})();
+</script>
+
+

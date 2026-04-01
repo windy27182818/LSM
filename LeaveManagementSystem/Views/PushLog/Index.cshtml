@@ -1,0 +1,47 @@
+﻿@model string[]
+
+@{
+    ViewData["Title"] = "Push Log (Admin)";
+    var total = (int)(ViewBag.TotalLines ?? 0);
+    var show = (int)(ViewBag.ShowLines ?? 200);
+    var path = (string)(ViewBag.FilePath ?? "");
+}
+
+<div class="container mt-4">
+    <h3>Push Log (Admin)</h3>
+
+    @if (TempData["Msg"] != null)
+    {
+        <div class="alert alert-success">@TempData["Msg"]</div>
+    }
+
+    <div class="mb-2 text-muted" style="font-size: 13px;">
+        File: <code>@path</code><br />
+        Total lines: <b>@total</b> | Showing last: <b>@show</b>
+    </div>
+
+    <div class="d-flex gap-2 mb-3">
+        <form method="get" asp-action="Index" class="d-flex gap-2">
+            <input type="number" name="lines" value="@show" min="20" max="2000" class="form-control" style="width: 140px;" />
+            <button type="submit" class="btn btn-primary">Refresh</button>
+        </form>
+
+        <form method="post" asp-action="Clear" onsubmit="return confirm('Sure need to delete push-log.txt?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger">Clear Log</button>
+        </form>
+
+        <form method="post" asp-action="Test">
+            <button class="btn btn-warning">Send Test Push</button>
+        </form>
+
+    </div>
+
+    <pre style="background:#111;color:#eee;padding:16px;border-radius:10px;max-height:70vh;overflow:auto;font-size:12px;line-height:1.35;">
+@(
+Model == null || Model.Length == 0
+? "(No logs yet)"
+: string.Join(Environment.NewLine, Model)
+)
+    </pre>
+</div>

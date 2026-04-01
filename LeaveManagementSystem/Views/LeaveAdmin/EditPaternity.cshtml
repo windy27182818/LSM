@@ -1,0 +1,49 @@
+﻿@model LeaveManagementSystem.ViewModels.LeaveAdminViewModel
+
+@{
+    ViewData["Title"] = "Edit Paternity Leave";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Edit Paternity Leave</h4>
+                    <p class="text-muted small mb-0">Editing for: <strong>@Model.Name</strong></p>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditPaternity">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Name" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="PaternityLeaveEntitlement" class="form-label">Entitlement (Days)</label>
+                            <input asp-for="PaternityLeaveEntitlement" class="form-control" type="number" step="0.5" />
+                            <span asp-validation-for="PaternityLeaveEntitlement" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PaternityLeaveUsed" class="form-label">Used (Days)</label>
+                            <input asp-for="PaternityLeaveUsed" class="form-control" type="number" step="0.5" />
+                            <span asp-validation-for="PaternityLeaveUsed" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

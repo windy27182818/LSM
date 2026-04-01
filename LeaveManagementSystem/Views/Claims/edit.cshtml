@@ -1,0 +1,280 @@
+﻿@using LeaveManagementSystem.ViewModels
+@model ClaimRequestFormViewModel
+
+@{
+    ViewData["Title"] = Model.Id == 0 ? "New Claim Request" : "Edit Claim Request";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h4 class="mb-0">@ViewData["Title"]</h4>
+                    <p class="text-muted small mb-0">
+                        @(Model.Id == 0 ? "Submit a new expense for reimbursement." : "Update your claim details.")
+                    </p>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- ⭐ MAIN SAVE FORM ⭐ -->
+                    <form asp-action="Form" method="post" enctype="multipart/form-data" id="mainForm">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Hidden fields -->
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="EmployeeId" />
+                        <input type="hidden" asp-for="IsAdmin" />
+                        <input type="hidden" asp-for="Receipt" />
+
+                        @if (!Model.IsAdmin)
+                        {
+                            <input type="hidden" asp-for="Status" />
+                            <input type="hidden" asp-for="ApproverRemarks" />
+                            <input type="hidden" asp-for="ApprovedDate" />
+                        }
+
+                        <!-- ✅ 关键：永远显示全局错误（Business Trip eligibility / Receipt required 等） -->
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+                        <h6 class="text-uppercase text-muted small mb-3">Claim Information</h6>
+
+                        <div class="row g-3">
+
+                            <!-- Employee -->
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Employee</label>
+                                <input class="form-control" asp-for="EmployeeName" readonly />
+                            </div>
+
+                            <!-- Date Created -->
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Date Created</label>
+                                <input class="form-control" value="@Model.CreatedAt.ToString("dd/MM/yyyy")" readonly />
+                            </div>
+
+                            <!-- Claim Type -->
+                            <div class="col-md-6">
+                                <label asp-for="ClaimTypeId" class="form-label small text-muted">Claim Type</label>
+                                <select asp-for="ClaimTypeId" asp-items="ViewBag.ClaimTypeList" class="form-select">
+                                    <option value="">-- Select Type --</option>
+                                </select>
+                                <span asp-validation-for="ClaimTypeId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="col-md-6">
+                                <label asp-for="Amount" class="form-label small text-muted">Amount (RM)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">RM</span>
+                                    <input asp-for="Amount" class="form-control" type="number" min="0" step="0.01" />
+                                </div>
+                                <span asp-validation-for="Amount" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Receipt Upload -->
+                            <div class="col-12">
+                                <label class="form-label small text-muted">
+                                    Receipt / Invoice
+                                    @if (Model.Id == 0)
+                                    {
+                                        <span class="text-danger fw-bold">*</span>
+                                    }
+                                </label>
+
+                                @* ✅ 有旧附件：走 Controller 下载（比 data-uri 稳太多） *@
+                                @if (!string.IsNullOrWhiteSpace(Model.Receipt) && Model.Id > 0)
+                                {
+                                    <div class="mb-2 p-2 border bg-light rounded d-flex align-items-center">
+                                        <i class="bi bi-file-earmark-check text-success fs-4 me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Current File Attached</small>
+                                            <a asp-controller="Claims"
+                                               asp-action="DownloadReceipt"
+                                               asp-route-id="@Model.Id"
+                                               class="fw-bold small text-decoration-none">
+                                                Download / View Existing File
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+
+                                <input type="file"
+                                       name="file"
+                                       id="FileAttachment"
+                                       class="form-control"
+                                       accept=".pdf,.png,.jpg,.jpeg" />
+
+                                <!-- ✅ 显示 Receipt 字段错误 -->
+                                <span asp-validation-for="Receipt" class="text-danger small"></span>
+
+                                <div class="form-text small text-muted">
+                                    Max size 2MB.
+                                    @if (!string.IsNullOrEmpty(Model.Receipt))
+                                    {
+                                        <span>Upload a new file to replace existing.</span>
+                                    }
+                                </div>
+
+                                <div id="fileSizeError" class="text-danger small" style="display:none;"></div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label small text-muted">Description</label>
+                                <textarea asp-for="Description" rows="3" class="form-control"></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+
+                            <!-- ⭐ Admin Only Section -->
+                            @if (Model.IsAdmin && Model.Id > 0)
+                            {
+                                <div class="col-12 mt-4 pt-3 border-top bg-light p-3 rounded">
+                                    <h6 class="text-uppercase text-danger small fw-bold">
+                                        <i class="bi bi-shield-lock-fill me-1"></i> Admin Approval Area
+                                    </h6>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label asp-for="Status" class="form-label small text-muted">Status</label>
+                                            <select asp-for="Status" class="form-select">
+                                                <option value="Pending">Pending</option>
+                                                <option value="Approved">Approved</option>
+                                                <option value="Rejected">Rejected</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label small text-muted">Approved Date</label>
+
+                                            @{
+                                                string approvedDisplay =
+                                                Model.Status == "Approved" && Model.ApprovedDate.HasValue
+                                                ? Model.ApprovedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                                : Model.Status == "Pending"
+                                                ? DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                                                : "-";
+                                            }
+
+                                            <input class="form-control bg-light"
+                                                   value="@approvedDisplay"
+                                                   readonly />
+                                        </div>
+
+
+                                        <div class="col-12">
+                                            <label asp-for="ApproverRemarks" class="form-label small text-muted">Approver Remarks</label>
+                                            <input asp-for="ApproverRemarks" class="form-control" placeholder="Optional comments..." />
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+
+                        <!-- ✅ Button Bar -->
+                        <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                @* Cancel button: 只有 Pending 才显示 *@
+                                @if (Model.Id > 0 && string.Equals(Model.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <button type="button"
+                                            id="btnCancelClaim"
+                                            class="btn btn-danger"
+                                            style="min-width:150px;">
+                                        Cancel Claim
+                                    </button>
+                                }
+
+                                <a asp-action="Index" class="btn btn-secondary" style="min-width:150px;">
+                                    Back to List
+                                </a>
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-warning text-white"
+                                    style="min-width:150px; background-color:#d4a017; border-color:#d4a017;">
+                                @(Model.Id > 0 ? "Save Changes" : "Submit Claim")
+                            </button>
+
+                        </div>
+                    </form>
+
+                    <!-- ✅ Hidden Cancel Form -->
+                    @if (Model.Id > 0 && string.Equals(Model.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <form id="cancelForm" asp-action="Cancel" method="post" class="d-none">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                        </form>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // File size validation (2MB)
+        const fileInput = document.getElementById("FileAttachment");
+        if (fileInput) {
+            fileInput.addEventListener("change", function () {
+                const file = this.files && this.files[0];
+                const err = document.getElementById("fileSizeError");
+
+                if (err) err.style.display = "none";
+
+                if (file && file.size > 2 * 1024 * 1024) {
+                    if (err) {
+                        err.textContent = "File too large. Max size is 2MB.";
+                        err.style.display = "block";
+                    }
+                    this.value = "";
+                }
+            });
+        }
+
+        // Cancel Claim SweetAlert2 popup
+        const btnCancel = document.getElementById("btnCancelClaim");
+        const cancelForm = document.getElementById("cancelForm");
+
+        if (btnCancel && cancelForm) {
+            btnCancel.addEventListener("click", function () {
+                Swal.fire({
+                    title: "Confirm cancellation?",
+                    html: `
+                        <div style="text-align:left">
+                            <div>This claim will not be able to proceed after cancellation.</div>
+                            <div class="mt-2">The status will become <span class="badge bg-secondary">Cancelled</span>.</div>
+                        </div>
+                    `,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Confirm",
+                    cancelButtonText: "No",
+                    reverseButtons: true,
+                    focusCancel: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        cancelForm.submit();
+                    }
+                });
+            });
+        }
+    </script>
+}

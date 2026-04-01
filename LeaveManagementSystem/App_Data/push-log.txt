@@ -1,0 +1,96 @@
+2026-01-09 00:20:27 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Annual Leave - 01/04/2026
+2026-01-09 00:20:28 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-09 00:20:38 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Approved: Annual Leave (01/04/2026)
+2026-01-09 00:20:39 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-09 14:27:13 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Sick Leave - 30/01/2026
+2026-01-09 14:27:13 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Daphne - Sick Leave - 30/01/2026
+2026-01-09 14:27:13 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-09 14:27:14 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-09 14:27:24 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Approved: Sick Leave (30/01/2026)
+2026-01-09 14:27:25 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-12 08:28:58 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Half Day - 12/01/2026
+2026-01-12 08:28:58 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Daphne - Half Day - 12/01/2026
+2026-01-12 08:28:59 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-12 08:28:59 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-12 08:29:08 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Approved: Half Day (12/01/2026)
+2026-01-12 08:29:08 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-13 11:04:30 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Annual Leave - 13/01/2026
+2026-01-13 11:04:30 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Daphne - Annual Leave - 13/01/2026
+2026-01-13 11:04:31 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-13 11:04:32 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-13 11:15:57 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Rejected: Annual Leave (13/01/2026)
+2026-01-13 11:15:58 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-13 11:16:50 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Annual Leave - 13/01/2026
+2026-01-13 11:16:50 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Daphne - Annual Leave - 13/01/2026
+2026-01-13 11:16:50 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-13 11:16:50 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-13 11:19:56 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Annual Leave - 13/01/2026
+2026-01-13 11:19:56 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Daphne - Annual Leave - 13/01/2026
+2026-01-13 11:19:56 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-13 11:19:57 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-13 11:20:48 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Approved: Annual Leave (13/01/2026)
+2026-01-13 11:20:49 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 09:37:46 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Wong - Annual Leave - 14/01/2026
+2026-01-14 09:37:46 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Wong - Annual Leave - 14/01/2026
+2026-01-14 09:37:47 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-14 09:37:47 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 09:38:15 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Wong - Annual Leave - 27/01/2026 - 29/01/2026
+2026-01-14 09:38:15 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Wong - Annual Leave - 27/01/2026 - 29/01/2026
+2026-01-14 09:38:15 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-14 09:38:16 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 10:19:35 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=Leave Approved: Annual Leave (27/01/2026 - 29/01/2026)
+2026-01-14 10:19:36 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-14 10:22:04 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=Leave Approved: Annual Leave (14/01/2026)
+2026-01-14 10:22:04 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-14 10:22:37 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Annual Leave - 16/03/2026 - 18/03/2026
+2026-01-14 10:22:37 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Daphne - Annual Leave - 16/03/2026 - 18/03/2026
+2026-01-14 10:22:38 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-14 10:22:38 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 10:23:21 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Daphne - Sick Leave - 14/01/2026
+2026-01-14 10:23:21 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Daphne - Sick Leave - 14/01/2026
+2026-01-14 10:23:21 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-14 10:23:22 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 10:23:47 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Approved: Sick Leave (14/01/2026)
+2026-01-14 10:23:47 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Approved: Sick Leave (14/01/2026)
+2026-01-14 10:23:48 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 10:23:48 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 12:39:17 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: Wong - Annual Leave - 21/01/2026 - 22/01/2026
+2026-01-14 12:39:17 | SEND | platform=Android | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/Android/CCS/pushAndBase.php | msg=New Leave Request: Wong - Annual Leave - 21/01/2026 - 22/01/2026
+2026-01-14 12:39:17 | RESP | platform=Android | status=200 OK | body=❌ Invalid FCM token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | The registration token is not a valid FCM registration token
+
+2026-01-14 12:39:18 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-01-14 12:40:54 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=Leave Approved: Annual Leave (20/01/2026 - 21/01/2026)
+2026-01-14 12:40:55 | RESP | platform=iOS | status=200 OK | body=✅ Token: c8619df2ff3f0305d6520f70cfd06b20d8e8bad21b0ffe0f54327fe029951b75 | Status: 200
+
+2026-03-31 17:35:19 | SEND | platform=iOS | tokens=1 | url=https://wp.jds.com.my/API/jsonPost/iOS/CCS/jsonp8push.php | msg=New Leave Request: windy - Annual Leave - 31/03/2026
+2026-03-31 17:35:21 | RESP | platform=iOS | status=200 OK | body=✅ Token: 1 | Status: 400
+

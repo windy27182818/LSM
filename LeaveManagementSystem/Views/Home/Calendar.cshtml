@@ -1,0 +1,644 @@
+﻿@{
+    ViewData["Title"] = "Leave Calendar";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css" />
+
+<style>
+    /* ===== Calendar Loading Overlay ===== */
+    .calendar-loading {
+        position: fixed;
+        inset: 0;
+        background: rgba(255,255,255,0.85);
+        z-index: 1040; /* below modal */
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-box {
+        text-align: center;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #ddd;
+        border-top: 5px solid #1d4ed8;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 12px;
+    }
+
+    .loading-text {
+        font-size: 14px;
+        color: #444;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ===== Header layout fix (avoid button resize/shift) ===== */
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: nowrap;
+    }
+
+    .calendar-header-left {
+        min-width: 220px;
+    }
+
+    .calendar-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0; /* ✅ prevent squeezed */
+        white-space: nowrap;
+    }
+
+    /* Make "Add Holiday" stable */
+    .btn-add-holiday {
+        height: 40px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 0;
+        font-weight: 600;
+        background: #1e3a8a;
+        color: #fff;
+        box-shadow: 0 6px 14px rgba(30,58,138,0.18);
+        min-width: 110px;
+    }
+
+        .btn-add-holiday:hover {
+            opacity: .92;
+        }
+
+    /* Toggle buttons stable height */
+    .view-toggle {
+        display: inline-flex;
+        background: #f3f4f6;
+        border-radius: 999px;
+        padding: 4px;
+        gap: 4px;
+        height: 40px;
+        align-items: center;
+    }
+
+    .toggle-switch {
+        height: 32px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border: 0;
+        background: transparent;
+        font-weight: 600;
+        color: #334155;
+    }
+
+        .toggle-switch.active {
+            background: #1e3a8a;
+            color: #fff;
+            box-shadow: 0 6px 14px rgba(30,58,138,0.15);
+        }
+
+    .legend-row {
+        margin-top: 10px;
+    }
+
+    .legend-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .legend-panel {
+        margin-top: 10px;
+        padding: 10px 10px;
+        border: 1px solid #eef2f7;
+        background: #fbfdff;
+        border-radius: 14px;
+    }
+
+    .legend-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .legend-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        font-size: 13px;
+        color: #334155;
+        line-height: 1;
+    }
+
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        display: inline-block;
+    }
+
+    .fc .fc-daygrid-event {
+        border: 0 !important;
+        border-radius: 8px !important;
+        padding: 2px 6px !important;
+        box-shadow: 0 2px 6px rgba(15,23,42,0.10);
+    }
+
+    .fc-list-event.leave-annual .fc-list-event-dot {
+        border-color: #A88F5E !important;
+    }
+
+    .fc-list-event.leave-sick .fc-list-event-dot {
+        border-color: #6F8DA6 !important;
+    }
+
+    .fc-list-event.leave-bereavement .fc-list-event-dot {
+        border-color: #7A756F !important;
+    }
+
+    .fc-list-event.leave-hospitalisation .fc-list-event-dot {
+        border-color: #6F6AA2 !important;
+    }
+
+    .fc-list-event.leave-maternity .fc-list-event-dot {
+        border-color: #B07A8A !important;
+    }
+
+    .fc-list-event.leave-emergency .fc-list-event-dot {
+        border-color: #B06F4E !important;
+    }
+
+    .fc-list-event.leave-paternity .fc-list-event-dot {
+        border-color: #5F8F7B !important;
+    }
+
+    .fc-list-event.event-public-holiday .fc-list-event-dot {
+        border-color: #dc2626 !important;
+    }
+
+    .fc-event.event-public-holiday,
+    .fc-daygrid-event.event-public-holiday,
+    .fc-timegrid-event.event-public-holiday {
+        background: #dc2626 !important;
+        border-color: #dc2626 !important;
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+        .fc-daygrid-event.event-public-holiday .fc-event-title,
+        .fc-daygrid-event.event-public-holiday .fc-event-title-container {
+            color: #fff !important;
+        }
+
+    .fc-list-event.event-public-holiday .fc-list-event-dot {
+        border-color: #dc2626 !important;
+    }
+
+    #calendar .fc-header-toolbar .fc-toolbar-chunk:first-child {
+        margin-left: 12px;
+    }
+
+        #calendar .fc-header-toolbar .fc-toolbar-chunk:first-child .fc-button-group {
+            margin-right: 8px;
+        }
+</style>
+
+<div id="calendarLoading" class="calendar-loading">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading calendar data…</div>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-3">
+    <div class="card-body">
+        <div class="calendar-header">
+            <div class="calendar-header-left">
+                <h4 class="card-title mb-0">Leave Calendar</h4>
+            </div>
+
+            <div class="calendar-header-actions">
+                @if (User.IsInRole("Admin"))
+                {
+                    <button type="button"
+                            class="btn-add-holiday"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addHolidayModal">
+                        Add Holiday
+                    </button>
+                }
+
+                <div id="viewToggle" class="view-toggle">
+                    <button type="button" class="toggle-switch active" data-view="dayGridMonth">Month</button>
+                    <button type="button" class="toggle-switch" data-view="listMonth">List</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="legend-row">
+            <div class="legend-panel">
+                <div class="legend-items">
+                    <span class="legend-pill"><span class="legend-dot" style="background:#a58a63;"></span>Annual Leave</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background:#6f8da6;"></span>Sick Leave</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background:#7a756f;"></span>Bereavement Leave</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background:#6f6aa2;"></span>Hospitalisation Leave</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background:#b07a8a;"></span>Maternity Leave</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background:#a15f47;"></span>Emergency Leave</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background:#5f8f7b;"></span>Paternity Leave</span>
+                    <span class="legend-pill"><span class="legend-dot" style="background:#dc2626;"></span>Public Holiday</span>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <div class="mt-3" id="calendar"></div>
+    </div>
+
+<div class="modal fade" id="addHolidayModal" tabindex="-1" aria-labelledby="addHolidayLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addHolidayLabel">Add Public Holiday</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addHolidayForm">
+                    <div class="mb-3">
+                        <label for="holidayName" class="form-label">Holiday Name</label>
+                        <input type="text" class="form-control" id="holidayName" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="holidayDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="holidayDate" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="holidayType" class="form-label">Type (optional)</label>
+                        <input type="text" class="form-control" id="holidayType" placeholder="public / bank / school ..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="holidayLocation" class="form-label">Location (optional)</label>
+                        <input type="text" class="form-control" id="holidayLocation" placeholder="Malaysia / Perak / Kelantan ..." />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <span class="text-danger small me-auto" id="holidayError" style="display:none;"></span>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveHolidayBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editHolidayModal" tabindex="-1" aria-labelledby="editHolidayLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editHolidayLabel">Edit Public Holiday</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="editHolidayId" />
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Holiday Name</label>
+                    <input id="editHolidayName" type="text" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Date</label>
+                    <input id="editHolidayDate" type="date" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Type (optional)</label>
+                    <input id="editHolidayType" type="text" class="form-control" placeholder="public / bank / school ..." />
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label small fw-semibold">Location (optional)</label>
+                    <input id="editHolidayLocation" type="text" class="form-control" placeholder="Malaysia / Perak / Kelantan ..." />
+                </div>
+            </div>
+
+            <div class="modal-footer justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-danger" id="btnDeleteHoliday">Delete</button>
+
+                    <span class="text-danger small" id="editHolidayError" style="display:none;"></span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveEditHoliday">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            if (!calendarEl) return;
+
+            var isAdmin = @(User.IsInRole("Admin").ToString().ToLower());
+
+            var loadingEl = document.getElementById('calendarLoading');
+            function showLoading() { if (loadingEl) loadingEl.style.display = 'flex'; }
+            function hideLoading() { if (loadingEl) loadingEl.style.display = 'none'; }
+
+            function removeButtonTitles() {
+                var toolbarButtons = calendarEl.querySelectorAll('.fc-header-toolbar button');
+                toolbarButtons.forEach(function (btn) { btn.removeAttribute('title'); });
+            }
+
+            function parseHolidayId(raw) {
+                raw = (raw || '').toString();
+                var digits = raw.replace(/\D/g, '');
+                return parseInt(digits, 10) || 0;
+            }
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                themeSystem: 'bootstrap5',
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                firstDay: 1,
+                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+
+                loading: function (isLoading) { if (isLoading) showLoading(); else hideLoading(); },
+
+                views: {
+                    dayGridMonth: {
+                        dayMaxEventRows: 3,
+                        eventContent: function (arg) {
+                            var rawTitle = arg.event.title || '';
+                            return { html: '<div class="fc-event-title">' + rawTitle + '</div>' };
+                        }
+                    },
+                    listMonth: { noEventsText: 'No leave in this month' }
+                },
+
+                displayEventTime: false,
+                eventDisplay: 'block',
+                events: '@Url.Action("GetLeaveEvents", "Home")',
+
+                eventClassNames: function (arg) {
+                    var classes = [];
+                    var props = arg.event.extendedProps || {};
+                    if (props.isSpecialRequest) classes.push('event-special-request');
+                    if (props.isPublicHoliday) classes.push('event-public-holiday');
+
+                    return classes;
+                },
+
+                eventDidMount: function (info) {
+                    var props = info.event.extendedProps || {};
+                    if (!!props.isPublicHoliday && !isAdmin) info.el.style.cursor = 'default';
+                },
+
+                eventClick: function (info) {
+                    var props = info.event.extendedProps || {};
+                    var isPublicHoliday = !!props.isPublicHoliday;
+
+                    if (isPublicHoliday) {
+                        info.jsEvent.preventDefault();
+                        if (isAdmin) openEditHolidayModal(info.event);
+                        return;
+                    }
+
+                    var targetUrl = props.detailUrl || info.event.url;
+                    if (targetUrl) {
+                        info.jsEvent.preventDefault();
+                        window.location.href = targetUrl;
+                    }
+                },
+
+                datesSet: function () { removeButtonTitles(); }
+            });
+
+            showLoading();
+            calendar.render();
+            removeButtonTitles();
+
+            // Month / List toggle
+            var toggleButtons = document.querySelectorAll('#viewToggle .toggle-switch');
+            toggleButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var viewName = this.getAttribute('data-view');
+                    calendar.changeView(viewName);
+                    toggleButtons.forEach(function (b) { b.classList.remove('active'); });
+                    this.classList.add('active');
+                    removeButtonTitles();
+                });
+            });
+
+            // ---------- Add Holiday ----------
+            var saveHolidayBtn = document.getElementById('saveHolidayBtn');
+            var errorLabel = document.getElementById('holidayError');
+            var addHolidayForm = document.getElementById('addHolidayForm');
+            var addHolidayModalEl = document.getElementById('addHolidayModal');
+
+            if (saveHolidayBtn) {
+                saveHolidayBtn.addEventListener('click', function () {
+                    errorLabel.style.display = 'none';
+                    errorLabel.textContent = '';
+
+                    var name = document.getElementById('holidayName').value.trim();
+                    var date = document.getElementById('holidayDate').value;
+                    var type = document.getElementById('holidayType').value.trim();
+                    var location = document.getElementById('holidayLocation').value.trim();
+
+                    if (!name || !date) {
+                        errorLabel.textContent = 'Please fill in holiday name and date.';
+                        errorLabel.style.display = 'inline';
+                        return;
+                    }
+
+                    saveHolidayBtn.disabled = true;
+                    showLoading();
+
+                    fetch('@Url.Action("AddPublicHoliday", "Home")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: name, date: date, type: type, location: location })
+                    })
+                    .then(function (response) {
+                        if (response.status === 409) {
+                            return response.json().then(function (data) { throw new Error(data.message || 'Holiday already exists.'); });
+                        }
+                        if (!response.ok) throw new Error('Failed to save holiday.');
+                        return response.json();
+                    })
+                    .then(function () {
+                        var modal = bootstrap.Modal.getInstance(addHolidayModalEl);
+                        if (!modal) modal = new bootstrap.Modal(addHolidayModalEl);
+                        modal.hide();
+
+                        addHolidayForm.reset();
+                        calendar.refetchEvents();
+                    })
+                    .catch(function (err) {
+                        hideLoading();
+                        errorLabel.textContent = err.message || 'Error saving holiday.';
+                        errorLabel.style.display = 'inline';
+                    })
+                    .finally(function () {
+                        saveHolidayBtn.disabled = false;
+                    });
+                });
+            }
+
+            // ---------- Edit Holiday ----------
+            function openEditHolidayModal(event) {
+                var props = event.extendedProps || {};
+                var numericId = parseHolidayId(event.id);
+
+                document.getElementById('editHolidayId').value = numericId;
+                document.getElementById('editHolidayName').value = event.title || '';
+
+                if (event.startStr) {
+                    document.getElementById('editHolidayDate').value = event.startStr.substring(0, 10);
+                } else if (event.start) {
+                    var d = event.start;
+                    var month = String(d.getMonth() + 1).padStart(2, '0');
+                    var day = String(d.getDate()).padStart(2, '0');
+                    document.getElementById('editHolidayDate').value = d.getFullYear() + '-' + month + '-' + day;
+                }
+
+                document.getElementById('editHolidayType').value = props.holidayType || '';
+                document.getElementById('editHolidayLocation').value = props.holidayLocation || '';
+
+                var modalEl = document.getElementById('editHolidayModal');
+                new bootstrap.Modal(modalEl).show();
+            }
+
+            var btnSaveEditHoliday = document.getElementById('btnSaveEditHoliday');
+            if (btnSaveEditHoliday) {
+                btnSaveEditHoliday.addEventListener('click', function () {
+                    var errorLabelEdit = document.getElementById('editHolidayError');
+                    if (errorLabelEdit) { errorLabelEdit.style.display = 'none'; errorLabelEdit.textContent = ''; }
+
+                    var id = parseHolidayId(document.getElementById('editHolidayId').value);
+                    var name = document.getElementById('editHolidayName').value.trim();
+                    var dateStr = document.getElementById('editHolidayDate').value;
+                    var type = document.getElementById('editHolidayType').value.trim();
+                    var location = document.getElementById('editHolidayLocation').value.trim();
+
+                    if (!id || !name || !dateStr) {
+                        if (errorLabelEdit) {
+                            errorLabelEdit.textContent = 'Please fill in Holiday Name and Date.';
+                            errorLabelEdit.style.display = 'inline';
+                        }
+                        return;
+                    }
+
+                    btnSaveEditHoliday.disabled = true;
+                    showLoading();
+
+                    var payload = { id: id, name: name, date: dateStr, type: type, location: location };
+
+                    fetch('@Url.Action("UpdatePublicHoliday", "Home")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            return response.json().then(function (data) { throw new Error(data.message || 'Failed to update holiday.'); })
+                                .catch(function () { throw new Error('Failed to update holiday.'); });
+                        }
+                        return response.json();
+                    })
+                    .then(function () {
+                        var modalEl = document.getElementById('editHolidayModal');
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        calendar.refetchEvents();
+                    })
+                    .catch(function (err) {
+                        hideLoading();
+                        if (errorLabelEdit) {
+                            errorLabelEdit.textContent = err.message || 'Error occurred while updating holiday.';
+                            errorLabelEdit.style.display = 'inline';
+                        }
+                    })
+                    .finally(function () {
+                        btnSaveEditHoliday.disabled = false;
+                    });
+                });
+            }
+
+            // ---------- Delete Holiday ----------
+            var btnDeleteHoliday = document.getElementById('btnDeleteHoliday');
+            if (btnDeleteHoliday) {
+                btnDeleteHoliday.addEventListener('click', function () {
+                    var id = parseHolidayId(document.getElementById('editHolidayId').value);
+                    if (!id) return;
+
+                    var errorLabelEdit = document.getElementById('editHolidayError');
+                    if (errorLabelEdit) { errorLabelEdit.style.display = 'none'; errorLabelEdit.textContent = ''; }
+
+                    btnDeleteHoliday.disabled = true;
+                    showLoading();
+
+                    fetch('@Url.Action("DeletePublicHoliday", "Home")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: id })
+                    })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('Failed to delete holiday.');
+                        return response.json();
+                    })
+                    .then(function () {
+                        var modalEl = document.getElementById('editHolidayModal');
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                        calendar.refetchEvents();
+                    })
+                    .catch(function (err) {
+                        hideLoading();
+                        if (errorLabelEdit) {
+                            errorLabelEdit.textContent = err.message || 'Error deleting holiday.';
+                            errorLabelEdit.style.display = 'inline';
+                        }
+                    })
+                    .finally(function () {
+                        btnDeleteHoliday.disabled = false;
+                    });
+                });
+            }
+        });
+    </script>
+}

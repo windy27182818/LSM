@@ -1,0 +1,249 @@
+﻿@model LeaveManagementSystem.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+
+    // 用来控制 Leave / Claim tab 高亮
+    string active = ViewBag.ActiveDashboard as string ?? "Leave";
+}
+
+<div class="container-fluid dashboard-container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">Dashboard</h2>
+            <small class="text-muted">
+                Overview for @DateTime.Now.ToString("MMMM yyyy")
+            </small>
+        </div>
+
+        
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card dash-card dash-total border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">This Month Total</div>
+                    <div class="dash-value">@Model.ThisMonthTotal</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card dash-card dash-approved border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">Approved</div>
+                    <div class="dash-value text-success">@Model.ThisMonthApproved</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card dash-card dash-pending border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">Pending</div>
+                    <div class="dash-value text-warning">@Model.ThisMonthPending</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card dash-card dash-rejected border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">Rejected</div>
+                    <div class="dash-value text-danger">@Model.ThisMonthRejected</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-1">
+                    <h6 class="mb-0 text-uppercase small text-muted">
+                        This Month by Leave Type
+                    </h6>
+                </div>
+                <div class="card-body pt-0">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th style="width: 70%;">Leave Type</th>
+                                <th class="text-end">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.ByLeaveType != null && Model.ByLeaveType.Any())
+                            {
+                                foreach (var item in Model.ByLeaveType)
+                                {
+                                    <tr>
+                                        <td>@item.LeaveTypeName</td>
+                                        <td class="text-end">
+                                            <span class="badge bg-light text-dark">
+                                                @item.Count
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="2" class="text-muted small">
+                                        No leave taken this month.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row g-3 mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-0 pb-1 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 text-uppercase small text-muted">
+                                        Leave History Search
+                                    </h6>
+                                    <small class="text-muted">Search by employee and month</small>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <form asp-action="Dashboard" method="get" class="row g-3 align-items-end mb-3">
+                                    <div class="col-md-4">
+                                        <label asp-for="EmployeeFilterId" class="form-label small text-muted">Employee</label>
+                                        <select asp-for="EmployeeFilterId"
+                                                asp-items="Model.EmployeeList"
+                                                class="form-select">
+                                            <option value="">-- All Employees --</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label asp-for="FilterYear" class="form-label small text-muted">Year</label>
+                                        <select asp-for="FilterYear" class="form-select">
+                                            @foreach (var y in Model.AvailableYears!)
+                                            {
+                                                <option value="@y" selected="@(y == Model.FilterYear)">
+                                                    @y
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label asp-for="FilterMonth" class="form-label small text-muted">Month</label>
+                                        <select asp-for="FilterMonth" class="form-select">
+                                            @for (int m = 1; m <= 12; m++)
+                                            {
+                                                var monthName = new DateTime(2000, m, 1).ToString("MMMM");
+                                                <option value="@m" selected="@(m == Model.FilterMonth)">
+                                                    @monthName
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-2 d-grid">
+                                        <button type="submit" class="btn-global-sm btn-global-primary">
+                                            Search
+                                        </button>
+                                    </div>
+                                </form>
+
+                                @if (Model.History != null && Model.History.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="small text-muted">
+                                                <tr>
+                                                    <th class="text-start">Employee</th>
+                                                    <th class="text-start">Leave Type</th>
+                                                    <th class="text-start">Period</th>
+                                                    <th class="text-center">Total Days</th>
+                                                    <th class="text-center">Status</th>
+                                                    <th class="text-center">Doc</th>
+                                                    <th class="text-end">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var row in Model.History)
+                                                {
+                                                    <tr>
+                                                        <td class="text-start">@row.EmployeeName</td>
+                                                        <td class="text-start">@row.LeaveTypeName</td>
+                                                        <td class="text-start">
+                                                            @row.StartDate.ToString("dd/MM/yyyy")
+                                                            -
+                                                            @row.EndDate.ToString("dd/MM/yyyy")
+                                                        </td>
+
+                                                        <td class="text-center">@row.TotalDays</td>
+
+                                                        <td class="text-center">
+                                                            @if (row.Status == "Approved")
+                                                            {
+                                                                <span class="badge rounded-pill bg-success px-3 py-2">Approved</span>
+                                                            }
+                                                            else if (row.Status == "Rejected")
+                                                            {
+                                                                <span class="badge rounded-pill bg-danger px-3 py-2">Rejected</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill bg-warning text-dark px-3 py-2">Pending</span>
+                                                            }
+                                                        </td>
+
+                                                        <td class="text-center">
+                                                            @if (!string.IsNullOrEmpty(row.AttachmentPath))
+                                                            {
+                                                                <a asp-controller="LeaveRequests"
+                                                                   asp-action="DownloadAttachment"
+                                                                   asp-route-id="@row.Id"
+                                                                   target="_blank"
+                                                                   download
+                                                                   class="text-decoration-none"
+                                                                   title="Download Attachment">
+                                                                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted opacity-25">
+                                                                    <i class="bi bi-file-earmark"></i>
+                                                                </span>
+                                                            }
+                                                        </td>
+
+                                                        <td class="text-end">
+                                                            <a asp-controller="LeaveRequests"
+                                                               asp-action="Details"
+                                                               asp-route-id="@row.Id"
+                                                               class="btn btn-warning btn-sm text-white">
+                                                                <i class="bi bi-eye me-1"></i>Details
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mb-0">
+                                        No records found for the selected filter.
+                                    </p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

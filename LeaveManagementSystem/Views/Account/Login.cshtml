@@ -1,0 +1,100 @@
+﻿@model LeaveManagementSystem.Models.LoginViewModel
+@{
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+    ViewData["Title"] = "Employee Login";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f6f6f6, #e0e0e0);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-card {
+        border-radius: 12px;
+        padding: 30px;
+        background: white;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+    }
+
+    .login-title {
+        font-weight: 700;
+        font-size: 22px;
+        color: #444;
+    }
+
+    .btn-jds {
+        background-color: #f4c430;
+        border-color: #f4c430;
+        color: black;
+        font-weight: 600;
+    }
+
+        .btn-jds:hover {
+            background-color: #e0b028;
+            border-color: #e0b028;
+            color: black;
+        }
+
+    .footer-text {
+        color: #777;
+        font-size: 13px;
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <div class="text-center mb-3">
+            <img src="~/images/logo.png" style="height:70px;" alt="Company Logo" />
+        </div>
+
+        <h4 class="text-center login-title mb-4">JDS Employee Login</h4>
+
+        <form asp-action="Login" method="post">
+            <input type="hidden" name="APN" value="@ViewData["APN"]" />
+            <input type="hidden" name="DeviceType" value="@ViewData["DeviceType"]" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input asp-for="Email" class="form-control" placeholder="example@jds.com" autocomplete="username" />
+                </div>
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input asp-for="Password" type="password" class="form-control" autocomplete="current-password" />
+                </div>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-jds w-100">Login</button>
+        </form>
+
+        <p class="text-center footer-text mt-3">© JDS Employee Leave Management System</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            if (window.history && window.history.pushState) {
+                history.pushState(null, '', location.href);
+
+                window.addEventListener('popstate', function (e) {
+                    history.pushState(null, '', location.href);
+                });
+            }
+        })();
+    </script>
+}

@@ -1,0 +1,65 @@
+﻿@model LeaveManagementSystem.Models.ClaimRequest
+
+<h2>Reject Claim Request</h2>
+
+<div>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h5 class="card-title text-danger">Review before Rejection</h5>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-3">Employee</dt>
+                <dd class="col-sm-9">@Model.Employee?.Name</dd>
+
+                <dt class="col-sm-3">Claim Type</dt>
+                @* 假設 ClaimRequest 有導航屬性 ClaimType *@
+                <dd class="col-sm-9">@Model.ClaimType?.Name</dd>
+
+                <dt class="col-sm-3">Created At</dt>
+                @* 顯示申請日期 *@
+                <dd class="col-sm-9">@Model.RequestDate.ToString("dd/MM/yyyy")</dd>
+
+                <dt class="col-sm-3">Amount</dt>
+                @* 顯示金額，這裡假設是貨幣格式 *@
+                <dd class="col-sm-9">@Model.Amount.ToString("C")</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">@Model.Description</dd>
+
+                <dt class="col-sm-3">Receipt</dt>
+                <dd class="col-sm-9">
+                    @if (!string.IsNullOrEmpty(Model.Receipt))
+                    {
+                        @* 顯示 Base64 圖片供管理員審核 *@
+                        <img src="@Model.Receipt" alt="Receipt" style="max-width: 200px; border: 1px solid #ddd; padding: 5px;" />
+                        <br />
+                        <small class="text-muted">Check the receipt before rejecting.</small>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No receipt attached.</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
+
+<form asp-action="RejectConfirmed" method="post">
+    @* 提交當前 Claim 的 ID *@
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="form-group">
+        <label for="remark" class="fw-bold">Reject Reason <span class="text-danger">*</span></label>
+        <textarea name="remark" id="remark" class="form-control" rows="3" required placeholder="Please explain why this claim is being rejected..."></textarea>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-danger" style="min-width: 100px;">
+            Confirm Reject
+        </button>
+        <a asp-action="Index" class="btn btn-secondary" style="min-width: 100px;">
+            Cancel
+        </a>
+    </div>
+</form>

@@ -1,0 +1,467 @@
+﻿@model IEnumerable<LeaveManagementSystem.ViewModels.LeaveAdminViewModel>
+
+@{
+    ViewData["Title"] = "Leave Management";
+}
+
+<style>
+    .leave-admin-wrapper {
+        background-color: #ffffff;
+        min-height: calc(100vh - 80px);
+    }
+
+    .leave-admin-card {
+        border-radius: 18px;
+        border: none;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .leave-admin-header {
+        border-bottom: 1px solid #eef1f7;
+    }
+
+    .leave-type-sidebar {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 16px 12px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .leave-type-title {
+        font-size: 0.75rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: #9ca3af;
+        margin-bottom: 8px;
+        padding-left: 6px;
+    }
+
+    .leave-type-btn {
+        width: 100%;
+        text-align: left;
+        border-radius: 999px;
+        padding: 9px 14px;
+        border: 1px solid #e5e7eb;
+        background-color: #ffffff;
+        font-size: 0.9rem;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+        transition: all 0.18s ease;
+    }
+
+        .leave-type-btn i {
+            font-size: 0.95rem;
+        }
+
+        .leave-type-btn:hover {
+            background-color: #f3f4ff;
+            border-color: #d1d5ff;
+        }
+
+        .leave-type-btn.active {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            color: #ffffff;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.5);
+        }
+
+            .leave-type-btn.active i {
+                color: #ffffff;
+            }
+
+    .current-leave-name {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .current-leave-subtitle {
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .leave-admin-table th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #9ca3af;
+        border-bottom-color: #e5e7eb;
+        white-space: nowrap;
+    }
+
+    .leave-admin-table td {
+        font-size: 0.9rem;
+        vertical-align: middle;
+        border-top-color: #eef1f7;
+        white-space: nowrap;
+    }
+
+    .badge-soft-primary {
+        background-color: #eef2ff;
+        color: #4338ca;
+    }
+
+    .badge-soft-success {
+        background-color: #ecfdf3;
+        color: #16a34a;
+    }
+
+    .badge-soft-danger {
+        background-color: #fef2f2;
+        color: #dc2626;
+    }
+
+    .table-footer-text {
+        font-size: 0.8rem;
+        color: #9ca3af;
+    }
+
+    @@media (max-width: 991.98px) {
+        .leave-type-sidebar {
+            margin-bottom: 16px;
+        }
+    }
+
+    @@media (min-width: 992px) {
+        .col-lg-2-3 {
+            flex: 0 0 19.16%;
+            max-width: 19.16%;
+        }
+
+        .col-lg-9-7 {
+            flex: 0 0 80.84%;
+            max-width: 80.84%;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4 leave-admin-wrapper">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+
+            <div class="mb-3">
+                <h2 class="h4 mb-1">Leave List</h2>
+                <p class="text-muted small mb-0">
+                    View and manage employees’ leave entitlement, usage and balance.
+                </p>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-3 col-lg-2-3 mb-3 mb-md-0">
+                    <div class="leave-type-sidebar">
+                        <div class="leave-type-title">Leave Types</div>
+
+                        <button type="button" class="leave-type-btn active" data-leavetype="annual">
+                            <i class="bi bi-sun"></i>
+                            <span>Annual</span>
+                        </button>
+
+                        <button type="button" class="leave-type-btn" data-leavetype="sick">
+                            <i class="bi bi-thermometer-half"></i>
+                            <span>Medical</span>
+                        </button>
+
+                        <button type="button" class="leave-type-btn" data-leavetype="hospital">
+                            <i class="bi bi-hospital"></i>
+                            <span>Hospitalisation</span>
+                        </button>
+
+                        <button type="button" class="leave-type-btn" data-leavetype="maternity">
+                            <i class="bi bi-gender-female"></i>
+                            <span>Maternity</span>
+                        </button>
+
+                        <button type="button" class="leave-type-btn" data-leavetype="paternity">
+                            <i class="bi bi-gender-male"></i>
+                            <span>Paternity</span>
+                        </button>
+
+                        <button type="button" class="leave-type-btn" data-leavetype="bereavement">
+                            <i class="bi bi-emoji-frown"></i>
+                            <span>Bereavement</span>
+                        </button>
+
+                        <button type="button" class="leave-type-btn" data-leavetype="unpaid">
+                            <i class="bi bi-wallet2"></i>
+                            <span>Unpaid</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-9 col-lg-9-7">
+                    <div class="card leave-admin-card">
+                        <div class="card-header bg-white leave-admin-header py-3 px-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div id="leaveTypeTitle" class="current-leave-name">Annual Leave</div>
+                                    <div id="leaveTypeSubtitle" class="current-leave-subtitle">
+                                        Entitlement, usage and remaining balance by employee.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 leave-admin-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Department</th>
+                                            <th scope="col">Employment Type</th>
+                                            <th scope="col">Join Date</th>
+
+                                            <th scope="col" class="text-center">Entitlement</th>
+                                            <th scope="col" class="text-center">Used</th>
+                                            <th scope="col" class="text-center">Balance</th>
+
+                                            <!-- Carry Forward header (Annual only) -->
+                                            <th id="thCarryForward" scope="col" class="text-center d-none">Total Balance</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        @if (Model != null && Model.Any())
+                                        {
+                                            foreach (var item in Model)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="fw-semibold">@item.Name</div>
+                                                        <div class="text-muted small">@item.Email</div>
+                                                    </td>
+
+                                                    <td>@item.Department</td>
+
+                                                    <td>
+                                                        <span class="badge rounded-pill badge-soft-primary">
+                                                            @item.EmploymentType
+                                                        </span>
+                                                    </td>
+
+                                                    <td>
+                                                        @(item.JoinDate.HasValue? item.JoinDate.Value.ToString("dd/MM/yyyy") : "-")
+                                                    </td>
+
+                                                    <!-- Entitlement -->
+                                                    <td class="text-center">
+                                                        <span class="leave-value annual-col">@($"{item.AnnualLeaveEntitlement:0.##}")</span>
+                                                        <span class="leave-value sick-col d-none">@item.SickLeaveEntitlement</span>
+                                                        <span class="leave-value hospital-col d-none">@($"{item.HospitalisationLeaveEntitlement:0.##}")</span>
+                                                        <span class="leave-value maternity-col d-none">@($"{item.MaternityLeaveEntitlement:0.##}")</span>
+                                                        <span class="leave-value paternity-col d-none">@($"{item.PaternityLeaveEntitlement:0.##}")</span>
+                                                        <span class="leave-value bereavement-col d-none">@($"{item.BereavementLeaveEntitlement:0.##}")</span>
+                                                        <span class="leave-value unpaid-col d-none">@($"{item.UnpaidLeaveEntitlement:0.##}")</span>
+                                                    </td>
+
+                                                    <!-- Used -->
+                                                    <td class="text-center">
+                                                        <span class="leave-value annual-col">@($"{item.AnnualLeaveUsed:0.##}")</span>
+                                                        <span class="leave-value sick-col d-none">@item.SickLeaveUsed</span>
+                                                        <span class="leave-value hospital-col d-none">@($"{item.HospitalisationLeaveUsed:0.##}")</span>
+                                                        <span class="leave-value maternity-col d-none">@($"{item.MaternityLeaveUsed:0.##}")</span>
+                                                        <span class="leave-value paternity-col d-none">@($"{item.PaternityLeaveUsed:0.##}")</span>
+                                                        <span class="leave-value bereavement-col d-none">@($"{item.BereavementLeaveUsed:0.##}")</span>
+                                                        <span class="leave-value unpaid-col d-none">@($"{item.UnpaidLeaveUsed:0.##}")</span>
+                                                    </td>
+
+                                                    <!-- Balance -->
+                                                    <td class="text-center">
+                                                        <span class="leave-value annual-col">
+                                                            @if (item.AnnualLeaveBalance <= 5)
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-danger">@($"{item.AnnualLeaveBalance:0.##}")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-success">@($"{item.AnnualLeaveBalance:0.##}")</span>
+                                                            }
+                                                        </span>
+
+                                                        <span class="leave-value sick-col d-none">
+                                                            @if (item.SickLeaveBalance <= 5)
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-danger">@item.SickLeaveBalance</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-success">@item.SickLeaveBalance</span>
+                                                            }
+                                                        </span>
+
+                                                        <span class="leave-value hospital-col d-none">
+                                                            @if (item.HospitalisationLeaveBalance <= 5)
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-danger">@($"{item.HospitalisationLeaveBalance:0.##}")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-success">@($"{item.HospitalisationLeaveBalance:0.##}")</span>
+                                                            }
+                                                        </span>
+
+                                                        <span class="leave-value maternity-col d-none">
+                                                            @if (item.MaternityLeaveBalance <= 5)
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-danger">@($"{item.MaternityLeaveBalance:0.##}")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-success">@($"{item.MaternityLeaveBalance:0.##}")</span>
+                                                            }
+                                                        </span>
+
+                                                        <span class="leave-value paternity-col d-none">
+                                                            @if (item.PaternityLeaveBalance <= 5)
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-danger">@($"{item.PaternityLeaveBalance:0.##}")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-success">@($"{item.PaternityLeaveBalance:0.##}")</span>
+                                                            }
+                                                        </span>
+
+                                                        <span class="leave-value bereavement-col d-none">
+                                                            @if (item.BereavementLeaveBalance <= 5)
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-danger">@($"{item.BereavementLeaveBalance:0.##}")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-success">@($"{item.BereavementLeaveBalance:0.##}")</span>
+                                                            }
+                                                        </span>
+
+                                                        <span class="leave-value unpaid-col d-none">
+                                                            @if (item.UnpaidLeaveBalance <= 5)
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-danger">@($"{item.UnpaidLeaveBalance:0.##}")</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill badge-soft-success">@($"{item.UnpaidLeaveBalance:0.##}")</span>
+                                                            }
+                                                        </span>
+                                                    </td>
+
+                                                    <!-- Carry Forward (Annual only) -->
+                                                    <td class="text-center">
+                                                        <span class="leave-value carry-col d-none">
+                                                            <span class="badge rounded-pill badge-soft-primary">
+                                                                @($"{item.AnnualCarryForward:0.##}")
+                                                            </span>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="8" class="text-center text-muted py-4">
+                                                    No employee records found.
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 d-flex justify-content-between px-4 py-2">
+                            <span class="table-footer-text">
+                                @(Model?.Count() ?? 0) employee(s)
+                            </span>
+                            <span class="table-footer-text">
+                                Last updated: @DateTime.Now.ToString("dd MMM yyyy")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var leaveTypeButtons = document.querySelectorAll('.leave-type-btn');
+            var allValues = document.querySelectorAll('.leave-value');
+
+            var thCarryForward = document.getElementById('thCarryForward');
+
+            var typeClassMap = {
+                annual: 'annual-col',
+                sick: 'sick-col',
+                hospital: 'hospital-col',
+                maternity: 'maternity-col',
+                paternity: 'paternity-col',
+                bereavement: 'bereavement-col',
+                unpaid: 'unpaid-col'
+            };
+
+            var titleMap = {
+                annual: 'Annual Leave',
+                sick: 'Medical Leave',
+                hospital: 'Hospitalisation Leave',
+                maternity: 'Maternity Leave',
+                paternity: 'Paternity Leave',
+                bereavement: 'Bereavement Leave',
+                unpaid: 'Unpaid Leave'
+            };
+
+            var subtitleEl = document.getElementById('leaveTypeSubtitle');
+            var titleEl = document.getElementById('leaveTypeTitle');
+
+            function setMode(type) {
+                leaveTypeButtons.forEach(function (btn) {
+                    btn.classList.toggle('active', btn.getAttribute('data-leavetype') === type);
+                });
+
+                if (titleEl) titleEl.textContent = titleMap[type] || 'Leave';
+                if (subtitleEl) subtitleEl.textContent = 'Entitlement, usage and remaining balance by employee.';
+
+                // hide all values
+                allValues.forEach(function (el) { el.classList.add('d-none'); });
+
+                // show selected type values
+                var typeClass = typeClassMap[type];
+                if (typeClass) {
+                    document.querySelectorAll('.leave-value.' + typeClass)
+                        .forEach(function (el) { el.classList.remove('d-none'); });
+                }
+
+                // Carry forward only for Annual
+                var isAnnual = (type === 'annual');
+
+                // show/hide header
+                if (thCarryForward) {
+                    thCarryForward.classList.toggle('d-none', !isAnnual);
+                }
+
+                // show/hide carry values
+                document.querySelectorAll('.leave-value.carry-col')
+                    .forEach(function (el) {
+                        el.classList.toggle('d-none', !isAnnual);
+                    });
+            }
+
+            leaveTypeButtons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var type = this.getAttribute('data-leavetype');
+                    setMode(type);
+                });
+            });
+
+            setMode('annual');
+        });
+    </script>
+}

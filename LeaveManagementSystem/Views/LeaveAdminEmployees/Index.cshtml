@@ -1,0 +1,80 @@
+﻿@model List<LeaveManagementSystem.Models.Employee>
+@{
+    ViewData["Title"] = "Employees";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="mb-0">Employees</h2>
+        <div class="text-muted">View and manage all employees.</div>
+    </div>
+
+    <a class="btn btn-warning rounded-pill px-4" asp-controller="LeaveAdminEmployees" asp-action="Create">
+        + Add Employee
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Employment Type</th>
+                        <th>Join Date</th>
+                        <th>Admin</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model == null || Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No employee found.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var e in Model)
+                        {
+                            <tr>
+                                <td>@(e.Name ?? "-")</td>
+                                <td>@(e.Email ?? "-")</td>
+                                <td>@(e.Department ?? "-")</td>
+                                <td>@(e.EmploymentType ?? "-")</td>
+                                <td>@(e.JoinDate.HasValue? e.JoinDate.Value.ToString("dd/MM/yyyy") : "-")</td>
+                                <td>
+                                    @if (e.IsAdmin)
+                                    {
+                                        <span class="badge bg-success">Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">No</span>
+                                    }
+                                </td>
+
+                                <td class="text-end">
+                                    <a asp-action="EditLeaveWallet" asp-route-id="@e.Id"
+                                       class="btn btn-warning text-white btn-sm rounded-pill px-3">
+                                        <i class="bi bi-pencil-square me-1"></i> Edit Leave Wallet
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

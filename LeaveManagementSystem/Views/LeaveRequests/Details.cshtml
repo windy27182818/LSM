@@ -1,0 +1,204 @@
+﻿@model LeaveManagementSystem.Models.LeaveRequest
+
+@{
+    ViewData["Title"] = "Leave Request Details";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">Leave Request Details</h4>
+                        <small class="text-muted">
+                            Submitted @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @* NEW: show Special / Normal badge *@
+                        @if (Model.IsSpecialRequest)
+                        {
+                            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+                                Special Request
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded-pill bg-secondary px-3 py-2">
+                                Normal
+                            </span>
+                        }
+
+                        @* existing status badge *@
+                        @if (Model.Status == "Approved")
+                        {
+                            <span class="badge rounded-pill bg-success px-3 py-2">
+                                Approved
+                            </span>
+                        }
+                        else if (Model.Status == "Rejected")
+                        {
+                            <span class="badge rounded-pill bg-danger px-3 py-2">
+                                Rejected
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+                                Pending
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Leave Info -->
+                    <h6 class="text-muted text-uppercase mb-3">Leave Information</h6>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="small text-muted">Employee</div>
+                            <div class="fw-semibold">
+                                @Model.Employee?.Name
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="small text-muted">Leave Type</div>
+                            <div class="fw-semibold">
+                                @Model.LeaveType?.Name
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="small text-muted">Total Days</div>
+                            <div class="fw-semibold">
+                                @Model.TotalDays
+                            </div>
+                        </div>
+                    </div>
+
+                    @* NEW: Request Type description *@
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="small text-muted">Request Type</div>
+                            <div class="fw-semibold">
+                                @(Model.IsSpecialRequest
+                                    ? "Special Request (more than 3 working days)"
+                                    : "Normal")
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="small text-muted">Start Date</div>
+                            <div class="fw-semibold">
+                                @Model.StartDate.ToString("dd/MM/yyyy hh:mm tt")
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="small text-muted">End Date</div>
+                            <div class="fw-semibold">
+                                @Model.EndDate.ToString("dd/MM/yyyy hh:mm tt")
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="small text-muted">Reason</div>
+                        <div class="border rounded p-2 bg-light">
+                            @Model.Reason
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.AttachmentPath))
+                    {
+                        <div class="mb-3">
+                            <div class="small text-muted">Supporting Document</div>
+                            <a href="~/attachments/leave_requests/@Model.AttachmentPath"
+                               target="_blank"
+                               class="btn btn-outline-primary btn-sm mt-1">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> View Attachment
+                            </a>
+                        </div>
+                    }
+                    <hr />
+
+                    <!-- Approval Info -->
+                    <h6 class="text-muted text-uppercase mb-3">Approval Information</h6>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="small text-muted">Status</div>
+                            <div class="fw-semibold">
+                                @if (Model.Status == "Approved")
+                                {
+                                    <span class="badge rounded-pill bg-success px-3 py-2">
+                                        Approved
+                                    </span>
+                                }
+                                else if (Model.Status == "Rejected")
+                                {
+                                    <span class="badge rounded-pill bg-danger px-3 py-2">
+                                        Rejected
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-warning text-dark px-3 py-2">
+                                        Pending
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="small text-muted">Created At</div>
+                            <div class="fw-semibold">
+                                @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="small text-muted">Approved Date</div>
+                            <div class="fw-semibold">
+                                @if (Model.ApprovedDate.HasValue)
+                                {
+                                    @Model.ApprovedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="small text-muted">Approver Remark</div>
+                        <div class="border rounded p-2 bg-light">
+                            @if (!string.IsNullOrWhiteSpace(Model.ApproverRemark))
+                            {
+                                @Model.ApproverRemark
+                            }
+                            else
+                            {
+                                <span class="text-muted">No remark</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <a asp-controller="Home"
+                       asp-action="Dashboard"
+                       class="btn-global btn-global-secondary">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

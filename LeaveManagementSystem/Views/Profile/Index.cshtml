@@ -1,0 +1,259 @@
+﻿@model LeaveManagementSystem.Models.Employee
+
+@{
+    ViewData["Title"] = "User Profile";
+
+    double Clamp(double v) => v < 0 ? 0 : v;
+
+    // ===== Annual (显示：Balance + Used) =====
+    var alCarryForward = Clamp(Model.AnnualCarryForward);
+    var annualEntitlement = Clamp(Model.AnnualLeaveEntitlement);
+    var annualRemaining = Clamp(Model.AnnualLeaveBalance);     // ✅ 只显示 balance，不加 carry forward
+    var alUsed = Clamp(Model.AnnualLeaveUsed);                 // ✅ 直接用 used，不用 entitlement-balance
+
+    // ===== 下面清单：全部显示 Entitlement（总额，不会变） =====
+    var totalSick = Model.SickLeaveEntitlement;
+    var totalHosp = Clamp(Model.HospitalisationLeaveEntitlement);
+    var totalMaternity = Clamp(Model.MaternityLeaveEntitlement);
+    var totalPaternity = Clamp(Model.PaternityLeaveEntitlement);
+    var totalBereavement = Clamp(Model.BereavementLeaveEntitlement);
+
+    // Unpaid: No limit
+    var unpaidText = "No limit";
+}
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h2 class="fw-bold mb-1">User Profile</h2>
+            <p class="text-muted mb-0">
+                View your personal and leave information.
+            </p>
+        </div>
+    </div>
+
+    @if (TempData["PwSuccess"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle me-1"></i>
+            @TempData["PwSuccess"]
+        </div>
+    }
+    @if (TempData["PwError"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            @TempData["PwError"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body border-bottom pb-3 d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+                             style="width:56px;height:56px;">
+                            <span class="text-primary fw-bold fs-4">
+                                @Model.Name?.FirstOrDefault()
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <h5 class="mb-0">@Model.Name</h5>
+                        <div class="small text-muted">
+                            @Model.Role
+                            @if (!string.IsNullOrEmpty(Model.Department))
+                            {
+                                @($" · {Model.Department}")
+                            }
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <div class="small text-muted mb-2">Remaining Leaves</div>
+
+                        <div class="d-flex flex-column gap-1 align-items-end">
+
+                            <div class="d-flex justify-content-between align-items-center mb-1"
+                                 style="min-width:240px;
+                                    background:#EAF2FF;
+                                    border:1px solid #A8C7FF;
+                                    border-radius:8px;
+                                    padding:4px 8px;">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="small fw-semibold" style="color:#1E4B8F;">Total AL Balance</span>
+                                </div>
+
+                                <span class="fw-semibold" style="color:#1E4B8F;">
+                                    @($"{alCarryForward:0.##}")
+                                </span>
+                            </div>
+
+                            <!-- ✅ AL Remaining = AnnualLeaveBalance only -->
+                            <div class="d-flex justify-content-between align-items-center mb-1"
+                                 style="min-width:240px;
+                                    background:#F5F2EE;
+                                    border:1px solid #D8D3C9;
+                                    border-radius:8px;
+                                    padding:4px 8px;">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="small fw-semibold" style="color:#6B6358;">AL Balance</span>
+                                </div>
+
+                                <span class="fw-semibold" style="color:#4B4337;">
+                                    @($"{annualRemaining:0.##}")
+                                </span>
+                            </div>
+
+                            <!-- ✅ AL Used = AnnualLeaveUsed (not entitlement - balance) -->
+                            <div class="d-flex justify-content-between align-items-center mb-1"
+                                 style="min-width:240px;
+                                    background:#FBEAEA;
+                                    border:1px solid #E2A6A6;
+                                    border-radius:8px;
+                                    padding:4px 8px;">
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="small fw-semibold" style="color:#8A1F1F;">AL Used</span>
+                                </div>
+
+                                <span class="fw-semibold" style="color:#8A1F1F;">
+                                    @($"{alUsed:0.##}")
+                                </span>
+                            </div>
+
+                            <!-- ✅ 下面这一列：只显示 entitlement 总额（不随申请变化） -->
+                            <div class="d-flex justify-content-between" style="min-width: 240px;">
+                                <span class="small text-muted">Annual</span>
+                                <span class="fw-semibold">@($"{annualEntitlement:0.##}")</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between" style="min-width: 240px;">
+                                <span class="small text-muted">Medical</span>
+                                <span class="fw-semibold">@totalSick</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between" style="min-width: 240px;">
+                                <span class="small text-muted">Hospitalisation</span>
+                                <span class="fw-semibold">@($"{totalHosp:0.##}")</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between" style="min-width: 240px;">
+                                <span class="small text-muted">Maternity</span>
+                                <span class="fw-semibold">@($"{totalMaternity:0.##}")</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between" style="min-width: 240px;">
+                                <span class="small text-muted">Paternity</span>
+                                <span class="fw-semibold">@($"{totalPaternity:0.##}")</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between" style="min-width: 240px;">
+                                <span class="small text-muted">Bereavement</span>
+                                <span class="fw-semibold">@($"{totalBereavement:0.##}")</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between" style="min-width: 240px;">
+                                <span class="small text-muted">Unpaid</span>
+                                <span class="fw-semibold">@unpaidText</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body border-bottom py-2">
+                    <div class="alert alert-light border-0 py-2 mb-0 small text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        This profile is read-only. Leave balances will be updated by the HR / admin.
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small mb-2">Personal</h6>
+
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label small fw-semibold"></label>
+                                <input asp-for="Name" class="form-control" readonly />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label small fw-semibold"></label>
+                                <input asp-for="Email" class="form-control" readonly />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Department" class="form-label small fw-semibold"></label>
+                                <input asp-for="Department" class="form-control" readonly />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Role" class="form-label small fw-semibold"></label>
+                                <input asp-for="Role" class="form-control" readonly />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small mb-2">Employment</h6>
+
+                            <div class="mb-3">
+                                <label asp-for="EmploymentType" class="form-label small fw-semibold"></label>
+                                <input class="form-control" value="@Model.EmploymentType" readonly />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="JoinDate" class="form-label small fw-semibold"></label>
+                                <input asp-for="JoinDate" type="date" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body border-top">
+                    <h6 class="text-uppercase text-muted small mb-2">Security</h6>
+
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h5 class="mb-0">Change Password</h5>
+                                    <div class="text-muted small">Update your account password.</div>
+                                </div>
+                            </div>
+
+                            <form asp-action="ChangePassword" method="post" class="mt-3">
+                                @Html.AntiForgeryToken()
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Current Password</label>
+                                    <input type="password" name="CurrentPassword" class="form-control" autocomplete="current-password" required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">New Password</label>
+                                    <input type="password" name="NewPassword" class="form-control" minlength="6" autocomplete="new-password" required />
+                                    <div class="form-text">Minimum 6 characters.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Confirm New Password</label>
+                                    <input type="password" name="ConfirmPassword" class="form-control" minlength="6" autocomplete="new-password" required />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-key me-1"></i>
+                                    Update Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

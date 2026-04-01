@@ -1,0 +1,305 @@
+﻿@model LeaveManagementSystem.ViewModels.ClaimDashboardViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var monthName = new DateTime(Model.Year, Model.Month, 1).ToString("MMMM yyyy");
+    var employeeList = ViewBag.EmployeeList as List<SelectListItem> ?? new List<SelectListItem>();
+    string active = ViewBag.ActiveDashboard as string ?? "Claim";
+}
+
+<div class="container-fluid dashboard-container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">Dashboard</h2>
+            <small class="text-muted">Overview for @monthName</small>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card dash-card dash-total border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">This Month Total</div>
+                    <div class="dash-value">@Model.TotalClaims</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card dash-card dash-approved border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">Approved</div>
+                    <div class="dash-value text-success">@Model.ApprovedCount</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card dash-card dash-pending border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">Pending</div>
+                    <div class="dash-value text-warning">@Model.PendingCount</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card dash-card dash-rejected border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="dash-label text-muted">Rejected</div>
+                    <div class="dash-value text-danger">@Model.RejectedCount</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- This Month by Claim Type -->
+    <div class="row g-3">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-1">
+                    <h6 class="mb-0 text-uppercase small text-muted">
+                        This Month by Claim Type
+                    </h6>
+                </div>
+
+                <div class="card-body pt-0">
+                    @if (Model.ClaimsByType != null && Model.ClaimsByType.Any())
+                    {
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th style="width: 60%;">Claim Type</th>
+                                    <th class="text-end" style="width: 20%;">Count</th>
+                                    <th class="text-end" style="width: 20%;">Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in Model.ClaimsByType)
+                                {
+                                    <tr>
+                                        <td>@row.ClaimTypeName</td>
+                                        <td class="text-end">
+                                            <span class="badge bg-light text-dark">
+                                                @row.Count
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            @row.TotalAmount.ToString("C")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">
+                            No claim submitted this month.
+                        </p>
+                    }
+                </div>
+
+                <!-- Claim History Search + 表格 -->
+                <div class="row g-3 mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-0 pb-1 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0 text-uppercase small text-muted">
+                                        Claim History Search
+                                    </h6>
+                                    <small class="text-muted">Search by employee and month</small>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <form asp-action="ClaimDashboard" method="get" class="row g-3 align-items-end mb-3">
+                                    <!-- Employee -->
+                                    <div class="col-md-4">
+                                        <label class="form-label small text-muted">Employee</label>
+                                        <select name="employeeId" class="form-select">
+                                            <option value="">-- All Employees --</option>
+                                            @foreach (var emp in employeeList)
+                                            {
+                                                bool isSelected =
+                                                Model.SelectedEmployeeId.HasValue &&
+                                                Model.SelectedEmployeeId.Value.ToString() == emp.Value;
+
+                                                <option value="@emp.Value" selected="@(isSelected ? "selected" : null)">
+                                                    @emp.Text
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Year -->
+                                    <div class="col-md-3">
+                                        <label class="form-label small text-muted">Year</label>
+                                        <select name="year" class="form-select">
+                                            @for (int y = DateTime.Now.Year - 3; y <= DateTime.Now.Year + 1; y++)
+                                            {
+                                                bool isSelected = y == Model.Year;
+                                                <option value="@y" selected="@(isSelected ? "selected" : null)">
+                                                    @y
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Month -->
+                                    <div class="col-md-3">
+                                        <label class="form-label small text-muted">Month</label>
+                                        <select name="month" class="form-select">
+                                            @for (int m = 1; m <= 12; m++)
+                                            {
+                                                var mName = new DateTime(2000, m, 1).ToString("MMMM");
+                                                bool isSelected = m == Model.Month;
+                                                <option value="@m" selected="@(isSelected ? "selected" : null)">
+                                                    @mName
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <!-- Search -->
+                                    <div class="col-md-2 d-grid">
+                                        <button type="submit" class="btn-global-sm btn-global-primary">
+                                            Search
+                                        </button>
+                                    </div>
+                                </form>
+
+                                @if (Model.ClaimHistory != null && Model.ClaimHistory.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="small text-muted">
+                                                <tr>
+                                                    <th class="text-start">Employee</th>
+                                                    <th class="text-center">Eligibility Status</th>
+                                                    <th class="text-center">Next Eligible</th>
+                                                    <th class="text-start">Claim Type</th>
+                                                    <th class="text-end">Amount</th>
+                                                    <th class="text-center">Status</th>
+                                                    <th class="text-center">Doc</th>
+                                                    <th class="text-center">Request Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var row in Model.ClaimHistory)
+                                                {
+                                                    bool isBusinessTrip = row.ClaimTypeName == "Business Trip";
+                                                    bool isEligible = row.EmployeeIsEligible;
+                                                    DateTime? nextEligible = row.EmployeeNextEligibleDate;
+
+                                                    <tr>
+                                                        <td class="text-start">@row.EmployeeName</td>
+
+                                                        <!-- Eligibility Status -->
+                                                        <td class="text-center">
+                                                            @if (isBusinessTrip)
+                                                            {
+                                                                if (isEligible)
+                                                                {
+                                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3">
+                                                                        <i class="bi bi-unlock-fill me-1"></i> Eligible
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3">
+                                                                        <i class="bi bi-lock-fill me-1"></i> No Eligible
+                                                                    </span>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3">
+                                                                    <i class="bi bi-unlock-fill me-1"></i> Eligible
+                                                                </span>
+                                                            }
+                                                        </td>
+
+                                                        <!-- Next Eligible -->
+                                                        <td class="text-center">
+                                                            @if (isBusinessTrip)
+                                                            {
+                                                                if (nextEligible.HasValue)
+                                                                {
+                                                                    @nextEligible.Value.ToString("dd/MM/yyyy")
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted small">-</span>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted small">No limit</span>
+                                                            }
+                                                        </td>
+
+                                                        <td class="text-start">@row.ClaimTypeName</td>
+
+                                                        <td class="text-end fw-bold text-dark">
+                                                            @row.Amount.ToString("C")
+                                                        </td>
+
+                                                        <!-- Status -->
+                                                        <td class="text-center">
+                                                            @{
+                                                                string status = row.Status;
+                                                                string badgeClass = status switch
+                                                                {
+                                                                    "Approved" => "bg-success",
+                                                                    "Rejected" => "bg-danger",
+                                                                    _ => "bg-warning text-dark"
+                                                                };
+                                                            }
+                                                            <span class="badge rounded-pill @badgeClass px-3">@status</span>
+                                                        </td>
+
+                                                        <!-- ✅ Doc -->
+                                                        <td class="text-center">
+                                                            @if (!string.IsNullOrWhiteSpace(row.Receipt))
+                                                            {
+                                                                <a asp-controller="Claims"
+                                                                   asp-action="DownloadReceipt"
+                                                                   asp-route-id="@row.Id"
+                                                                   class="text-decoration-none"
+                                                                   title="Download Doc">
+                                                                    <i class="bi bi-file-earmark-arrow-down"></i>
+                                                                </a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="text-muted small">-</span>
+                                                            }
+                                                        </td>
+
+                                                        <!-- Request Date -->
+                                                        <td class="text-center">
+                                                            @row.RequestDate.ToString("dd/MM/yyyy")
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mb-0">
+                                        No records found for the selected filter.
+                                    </p>
+                                }
+                            </div>  <!-- card-body -->
+                        </div>      <!-- inner card -->
+                    </div>          <!-- col-12 -->
+                </div>              <!-- row g-3 mt-4 -->
+            </div>                  <!-- outer card -->
+        </div>
+    </div>
+</div>

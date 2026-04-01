@@ -1,0 +1,144 @@
+﻿@model LeaveManagementSystem.ViewModels.LeaveAdminViewModel
+
+@{
+    ViewData["Title"] = "Edit Employee Leave";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0">
+                    <h2 class="h5 mb-1">Edit Employee Leave</h2>
+                    <p class="text-muted small mb-0">
+                        Update annual leave and sick leave entitlement / usage for this employee.
+                    </p>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted small mb-3">Employee Info</h6>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Name</label>
+                                    <input class="form-control" value="@Model.Name" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Email</label>
+                                    <input class="form-control" value="@Model.Email" readonly />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Department</label>
+                                    <input class="form-control" value="@Model.Department" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="EmploymentType" class="form-label small fw-semibold"></label>
+                                    <input asp-for="EmploymentType" class="form-control" />
+                                    <span asp-validation-for="EmploymentType" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="JoinDate" class="form-label small fw-semibold">Join Date</label>
+                                    <input asp-for="JoinDate" type="date" class="form-control" />
+                                    <span asp-validation-for="JoinDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted small mb-3">Annual Leave</h6>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label asp-for="AnnualLeaveEntitlement" class="form-label small fw-semibold">
+                                        Annual Leave Entitlement (days)
+                                    </label>
+                                    <input asp-for="AnnualLeaveEntitlement" class="form-control" type="number" min="0" />
+                                    <span asp-validation-for="AnnualLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="AnnualLeaveUsed" class="form-label small fw-semibold">
+                                        Used (current year)
+                                    </label>
+                                    <input asp-for="AnnualLeaveUsed" class="form-control" type="number" min="0" />
+                                    <span asp-validation-for="AnnualLeaveUsed" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="AnnualLeaveBalance" class="form-label small fw-semibold">
+                                        Balance
+                                    </label>
+                                    <input asp-for="AnnualLeaveBalance" class="form-control" type="number" min="0" />
+                                    <span asp-validation-for="AnnualLeaveBalance" class="text-danger small"></span>
+                                    <div class="form-text small">
+                                        Typically calculated as <strong>Entitlement − Used</strong>.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted small mb-3">Sick Leave</h6>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label asp-for="SickLeaveEntitlement" class="form-label small fw-semibold">
+                                        Sick Leave Entitlement (days)
+                                    </label>
+                                    <input asp-for="SickLeaveEntitlement" class="form-control" type="number" min="0" />
+                                    <span asp-validation-for="SickLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="SickLeaveUsed" class="form-label small fw-semibold">
+                                        Sick Leave Used
+                                    </label>
+                                    <input asp-for="SickLeaveUsed" class="form-control" type="number" min="0" />
+                                    <span asp-validation-for="SickLeaveUsed" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="SickLeaveBalance" class="form-label small fw-semibold">
+                                        Sick Leave Balance
+                                    </label>
+                                    <input asp-for="SickLeaveBalance" class="form-control" type="number" min="0" />
+                                    <span asp-validation-for="SickLeaveBalance" class="text-danger small"></span>
+                                    <div class="form-text small">
+                                        Typically calculated as <strong>Entitlement − Used</strong>.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-link text-muted">
+                                <i class="bi bi-arrow-left me-1"></i> Back to list
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

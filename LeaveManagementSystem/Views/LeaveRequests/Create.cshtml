@@ -1,0 +1,300 @@
+﻿@model LeaveManagementSystem.ViewModels.LeaveRequestCreateViewModel
+
+@{
+    ViewData["Title"] = "New Leave Request";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">New Leave Request</h4>
+                        <div class="text-muted small">
+                            Fill in your leave details and submit for approval.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Annual Leave Application Policy</strong>
+                        <ul class="mb-0 mt-1">
+                            <li>
+                                Applications for <strong>3 or more consecutive days</strong>
+                                (<strong>excluding weekends but including public holidays</strong>)
+                                must be submitted <strong>at least 60 day in advance</strong>.
+                            </li>
+                            <li>
+                                Applications for <strong>2 consecutive days or below</strong>
+                                must be submitted <strong>at least 5 working days in advance</strong>
+                                and are subject to approval.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small" role="alert"></div>
+
+                    <form asp-action="Create" enctype="multipart/form-data" method="post" id="createLeaveForm">
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-muted small mb-3">Leave Information</h6>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">Employee</label>
+                                    <input class="form-control" value="@ViewData["EmployeeName"]" readonly />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="LeaveTypeId" class="form-label small text-muted">Leave Type</label>
+                                    <select asp-for="LeaveTypeId" class="form-select" asp-items="ViewBag.LeaveTypeId" id="LeaveTypeId">
+                                        <option value="">-- Select Leave Type --</option>
+                                    </select>
+                                    <span asp-validation-for="LeaveTypeId" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="StartDate" class="form-label small text-muted">Start Date</label>
+                                    <input asp-for="StartDate" class="form-control" id="StartDate" type="date" />
+                                    <span asp-validation-for="StartDate" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="EndDate" class="form-label small text-muted">End Date</label>
+                                    <input asp-for="EndDate" class="form-control" id="EndDate" type="date" />
+                                    <span asp-validation-for="EndDate" class="text-danger small"></span>
+                                    <span id="dateError" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label asp-for="TotalDays" class="form-label small text-muted">Total Days</label>
+                                    <input asp-for="TotalDays" class="form-control" id="TotalDays" readonly />
+                                    <span asp-validation-for="TotalDays" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="FileAttachment" class="form-label small text-muted">
+                                        Supporting Document (PDF, PNG, JPG)
+                                        <span id="fileReqStar" class="text-danger" style="display:none; font-weight:bold">*</span>
+                                    </label>
+                                    <input asp-for="FileAttachment"
+                                           type="file"
+                                           accept=".pdf,.png,.jpg,.jpeg"
+                                           class="form-control"
+                                           id="FileAttachment" />
+                                    <span asp-validation-for="FileAttachment" class="text-danger small"></span>
+                                </div>
+
+                                <!-- ✅ Reason 必填：加 * + required + 前端提示 -->
+                                <div class="col-md-8">
+                                    <label asp-for="Reason" class="form-label small text-muted">
+                                        Reason <span class="text-danger fw-bold">*</span>
+                                    </label>
+                                    <textarea asp-for="Reason"
+                                              class="form-control"
+                                              rows="3"
+                                              id="Reason"
+                                              required
+                                              placeholder="Please enter reason/remark"></textarea>
+                                    <span asp-validation-for="Reason" class="text-danger small"></span>
+                                    <span id="reasonError" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted">Created At</label>
+                                    <input class="form-control"
+                                           value="@DateTime.Now.ToString("dd/MM/yyyy HH:mm")"
+                                           readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary" style="min-width: 150px;">
+                                Back to List
+                            </a>
+                            <button type="submit" class="btn btn-warning text-white" style="min-width: 150px; background-color:#d4a017; border-color:#d4a017;">
+                                Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+    }
+
+    <script>
+        const calcUrl = '@Url.Action("CalculateTotalDays", "LeaveRequests")';
+
+        function checkFileRequirement() {
+            const leaveType = document.getElementById("LeaveTypeId");
+            const fileInput = document.getElementById("FileAttachment");
+            const starSpan = document.getElementById("fileReqStar");
+
+            if (!leaveType || !fileInput) return;
+            if (leaveType.selectedIndex === -1) return;
+
+            let selected = leaveType.options[leaveType.selectedIndex].text.toLowerCase();
+
+            const isMandatory =
+                selected.includes("sick") ||
+                selected.includes("bereavement") ||
+                selected.includes("hospitalisation") ||
+                selected.includes("hospitalization") ||
+                selected.includes("maternity");
+
+            if (isMandatory) {
+                fileInput.required = true;
+                if (starSpan) starSpan.style.display = "inline";
+            } else {
+                fileInput.required = false;
+                if (starSpan) starSpan.style.display = "none";
+            }
+        }
+
+        function checkAnnualLeaveRule() {
+            const leaveType = document.getElementById("LeaveTypeId");
+            const startInput = document.getElementById("StartDate");
+            const totalDaysInput = document.getElementById("TotalDays");
+            const dateErrorSpan = document.getElementById("dateError");
+
+            if (!leaveType || !startInput || !totalDaysInput || !dateErrorSpan) return;
+
+            let selected = "";
+            if (leaveType.selectedIndex !== -1) {
+                selected = leaveType.options[leaveType.selectedIndex].text.toLowerCase();
+            }
+
+            let totalDays = parseFloat(totalDaysInput.value) || 0;
+            let startVal = startInput.value;
+
+            dateErrorSpan.textContent = "";
+            dateErrorSpan.classList.remove("text-danger");
+            dateErrorSpan.classList.remove("text-warning");
+
+            if (!startVal) return;
+            if (!selected.includes("annual")) return;
+            if (totalDays <= 3) return;
+
+            const startDate = new Date(startVal);
+            startDate.setHours(0, 0, 0, 0);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const diffMs = startDate - today;
+            const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+            if (diffDays < 30) {
+                dateErrorSpan.textContent =
+                    "Note: This Annual Leave exceeds 3 working days and was submitted less than 1 month in advance. It will be treated as a Special Request and may require additional approval.";
+                dateErrorSpan.classList.add("text-warning");
+            }
+        }
+
+        // ✅ 改成：从后端计算（排除公共假期 + 周末 + 半天逻辑）
+        async function calculateTotalDays() {
+            const startInput = document.getElementById("StartDate");
+            const endInput = document.getElementById("EndDate");
+            const totalDaysInput = document.getElementById("TotalDays");
+            const leaveType = document.getElementById("LeaveTypeId");
+            const errorSpan = document.getElementById("dateError");
+
+            if (!startInput || !endInput || !totalDaysInput || !errorSpan) return;
+
+            const startVal = startInput.value;
+            const endVal = endInput.value;
+
+            // 先清空显示
+            totalDaysInput.value = "";
+            errorSpan.textContent = "";
+            errorSpan.classList.remove("text-danger");
+            errorSpan.classList.remove("text-warning");
+
+            if (!startVal || !endVal) {
+                checkAnnualLeaveRule();
+                return;
+            }
+
+            const start = new Date(startVal);
+            const end = new Date(endVal);
+            start.setHours(0, 0, 0, 0);
+            end.setHours(0, 0, 0, 0);
+
+            if (isNaN(start) || isNaN(end)) return;
+
+            if (end < start) {
+                errorSpan.textContent = "End Date must be later than or equal to Start Date.";
+                errorSpan.classList.add("text-danger");
+                return;
+            }
+
+            const leaveTypeId = leaveType ? leaveType.value : "";
+
+            try {
+                const url = `${calcUrl}?startDate=${encodeURIComponent(startVal)}&endDate=${encodeURIComponent(endVal)}&leaveTypeId=${encodeURIComponent(leaveTypeId)}`;
+                const res = await fetch(url, { method: "GET" });
+
+                if (!res.ok) {
+                    // API 不通时：至少别让页面死掉
+                    console.error("CalculateTotalDays API failed:", res.status);
+                    totalDaysInput.value = "";
+                    checkAnnualLeaveRule();
+                    return;
+                }
+
+                const data = await res.json();
+                const days = (data && data.totalDays != null) ? data.totalDays : 0;
+
+                totalDaysInput.value = days;
+
+            } catch (e) {
+                console.error("calculateTotalDays error:", e);
+            }
+
+            checkAnnualLeaveRule();
+        }
+
+        // ✅ 提交前强制检查 Reason
+        function validateReasonBeforeSubmit(e) {
+            const reason = document.getElementById("Reason");
+            const err = document.getElementById("reasonError");
+            if (!reason) return true;
+
+            const value = (reason.value || "").trim();
+            if (err) err.textContent = "";
+
+            if (value.length === 0) {
+                if (err) err.textContent = "Reason/Remark is required.";
+                reason.focus();
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        }
+
+        // 绑定事件
+        document.getElementById("StartDate")?.addEventListener("change", calculateTotalDays);
+        document.getElementById("EndDate")?.addEventListener("change", calculateTotalDays);
+
+        document.getElementById("LeaveTypeId")?.addEventListener("change", function () {
+            calculateTotalDays();
+            checkFileRequirement();
+        });
+
+        document.getElementById("createLeaveForm")?.addEventListener("submit", validateReasonBeforeSubmit);
+
+        window.onload = function () {
+            calculateTotalDays();
+            checkFileRequirement();
+        };
+    </script>
+}

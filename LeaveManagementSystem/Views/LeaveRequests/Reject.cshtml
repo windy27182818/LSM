@@ -1,0 +1,23 @@
+﻿@model LeaveManagementSystem.Models.LeaveRequest
+
+<h2>Reject Leave Request</h2>
+
+<div>
+    <strong>Employee:</strong> @Model.Employee!.Name <br />
+    <strong>Leave Type:</strong> @Model.LeaveType!.Name <br />
+    <strong>Period:</strong> @Model.StartDate.ToShortDateString() - @Model.EndDate.ToShortDateString() <br />
+    <strong>Total Days:</strong> @Model.TotalDays <br />
+    <strong>Reason:</strong> @Model.Reason <br />
+</div>
+
+<form asp-action="RejectConfirmed" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="form-group mt-3">
+        <label>Reject Reason</label>
+        <textarea name="remark" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-danger mt-3">Reject</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Cancel</a>
+</form>

@@ -1,0 +1,379 @@
+﻿@model LeaveManagementSystem.Models.LeaveRequest
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Edit Leave Request";
+    bool isAdmin = ViewBag.IsAdmin != null && (bool)ViewBag.IsAdmin;
+
+    // ✅ current login EmployeeId (from ClaimTypes.NameIdentifier)
+    int currentUserEmployeeId = 0;
+    var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!string.IsNullOrEmpty(idClaim) && int.TryParse(idClaim, out var parsedId))
+    {
+        currentUserEmployeeId = parsedId;
+    }
+
+    // ✅ can cancel when: Pending + own request (Admin or Staff same rule)
+    bool canCancel =
+        string.Equals(Model.Status, "Pending", StringComparison.OrdinalIgnoreCase) &&
+        Model.EmployeeId == currentUserEmployeeId;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h2 class="h4 mb-1">Edit Leave Request</h2>
+                    <p class="text-muted small mb-3">
+                        Update your leave details and submit the changes for approval.
+                    </p>
+                </div>
+
+                <div class="card-body pt-3">
+
+                    @if (canCancel)
+                    {
+                        <form id="cancelForm" asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-none">
+                            @Html.AntiForgeryToken()
+                        </form>
+                    }
+
+                    <form asp-action="Edit" enctype="multipart/form-data" method="post" id="editLeaveForm">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="EmployeeId" />
+                        <input type="hidden" asp-for="CreatedAt" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <h6 class="text-uppercase text-muted small mb-3">Leave Information</h6>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="EmployeeId" class="form-label small text-muted">Employee</label>
+                                <input class="form-control" value="@ViewBag.EmployeeName" disabled />
+                                <span asp-validation-for="EmployeeId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LeaveTypeId" class="form-label small fw-semibold">Leave Type</label>
+                                @if (isAdmin)
+                                {
+                                    <select asp-for="LeaveTypeId" class="form-select" asp-items="ViewBag.LeaveTypeId" disabled></select>
+                                    <input type="hidden" asp-for="LeaveTypeId" />
+                                }
+                                else
+                                {
+                                    <select asp-for="LeaveTypeId" class="form-select" asp-items="ViewBag.LeaveTypeId" id="LeaveTypeId"></select>
+                                }
+                                <span asp-validation-for="LeaveTypeId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="StartDate" class="form-label small fw-semibold">Start Date</label>
+                                @if (isAdmin)
+                                {
+                                    <input asp-for="StartDate" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" readonly />
+                                }
+                                else
+                                {
+                                    <input asp-for="StartDate" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" id="StartDate" />
+                                }
+                                <span asp-validation-for="StartDate" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="EndDate" class="form-label small fw-semibold">End Date</label>
+                                @if (isAdmin)
+                                {
+                                    <input asp-for="EndDate" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" readonly />
+                                }
+                                else
+                                {
+                                    <input asp-for="EndDate" class="form-control" type="date" asp-format="{0:yyyy-MM-dd}" id="EndDate" />
+                                }
+                                <span asp-validation-for="EndDate" class="text-danger small"></span>
+                                <span id="dateError" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="TotalDays" class="form-label small fw-semibold">Total Days</label>
+                                <input asp-for="TotalDays" class="form-control" id="TotalDays" readonly />
+                                <span asp-validation-for="TotalDays" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-8">
+                                <label asp-for="Reason" class="form-label small fw-semibold">
+                                    Reason
+                                    @if (!isAdmin)
+                                    {
+                                        <span class="text-danger fw-bold">*</span>
+                                    }
+                                </label>
+
+                                @if (isAdmin)
+                                {
+                                    <textarea asp-for="Reason" class="form-control" rows="2" readonly></textarea>
+                                }
+                                else
+                                {
+                                    <textarea asp-for="Reason" class="form-control" rows="2" id="Reason" required></textarea>
+                                    <span id="reasonError" class="text-danger small"></span>
+                                }
+                                <span asp-validation-for="Reason" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Supporting Document</label>
+                                <input type="file" name="NewFileAttachment" class="form-control" accept=".pdf,.png,.jpg,.jpeg" />
+                                @if (!string.IsNullOrEmpty(Model.AttachmentPath))
+                                {
+                                    <div class="mt-1 small">
+                                        <a asp-action="DownloadAttachment" asp-route-id="@Model.Id" target="_blank">
+                                            Current Attachment
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        @if (isAdmin)
+                        {
+                            <h6 class="text-uppercase text-muted small mb-3">APPROVAL INFORMATION</h6>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Status" class="form-label small text-muted">Status</label>
+                                    <select asp-for="Status" class="form-select" id="Status">
+                                        <option value="Pending">Pending</option>
+                                        <option value="Approved">Approved</option>
+                                        <option value="Rejected">Rejected</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">Created At</label>
+                                    <input class="form-control" value="@Model.CreatedAt.ToString("dd/MM/yyyy")" readonly />
+                                </div>
+
+                                @* ✅ Approved Date 改成只读展示（自动生成，不让人改） *@
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted">Approved Date</label>
+
+                                    @{
+                                        string status = Model.Status ?? "";
+
+                                        string approvedText =
+                                        // Approved / Rejected：优先显示 DB 的 ApprovedDate；如果还没写入就先预览当前时间
+                                        ((status.Equals("Approved", StringComparison.OrdinalIgnoreCase) ||
+                                        status.Equals("Rejected", StringComparison.OrdinalIgnoreCase)))
+                                        ? (Model.ApprovedDate.HasValue
+                                        ? Model.ApprovedDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                        : DateTime.Now.ToString("dd/MM/yyyy HH:mm"))
+                                        // Pending：预览当前时间
+                                        : status.Equals("Pending", StringComparison.OrdinalIgnoreCase)
+                                        ? DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                                        // 其他：-
+                                        : "-";
+                                    }
+
+                                    <input class="form-control" value="@approvedText" readonly />
+                                    <div class="form-text">
+                                        Auto generated when status is Approved/Rejected.
+                                    </div>
+
+                                    <!-- ✅ 保留 hidden，避免 model binding 时丢字段 -->
+                                    <input type="hidden" asp-for="ApprovedDate" />
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="ApproverRemark" class="form-label small text-muted">
+                                        Approver Remark <span class="text-danger fw-bold">*</span>
+                                    </label>
+                                    <textarea asp-for="ApproverRemark"
+                                              class="form-control"
+                                              rows="3"
+                                              id="ApproverRemark"
+                                              placeholder="Please enter remark (required when approving/rejecting)"></textarea>
+                                    <span asp-validation-for="ApproverRemark" class="text-danger small"></span>
+                                    <span id="approverRemarkError" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="d-flex align-items-center mt-4">
+                            <div class="d-flex gap-2">
+                                <a asp-action="Index" class="btn-global btn-global-secondary">
+                                    Back to List
+                                </a>
+
+                                @if (canCancel)
+                                {
+                                    <button type="button"
+                                            class="btn btn-danger"
+                                            style="min-width:120px"
+                                            id="btnCancelLeave">
+                                        Cancel
+                                    </button>
+                                }
+                            </div>
+
+                            <button type="submit" class="btn-global btn-global-warning ms-auto">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function calculateTotalDays() {
+            const startInput = document.getElementById("StartDate");
+            const endInput = document.getElementById("EndDate");
+            const totalDaysInput = document.getElementById("TotalDays");
+            const leaveType = document.getElementById("LeaveTypeId");
+            const errorSpan = document.getElementById("dateError");
+
+            if (!startInput || !endInput || !totalDaysInput) return;
+
+            const startVal = startInput.value;
+            const endVal = endInput.value;
+
+            if (!startVal || !endVal) return;
+
+            const start = new Date(startVal);
+            const end = new Date(endVal);
+
+            start.setHours(0,0,0,0);
+            end.setHours(0,0,0,0);
+
+            if (isNaN(start) || isNaN(end)) return;
+
+            if (end < start) {
+                if (errorSpan) errorSpan.textContent = "End Date must be later than or equal to Start Date.";
+                totalDaysInput.value = 0;
+                return;
+            } else {
+                if (errorSpan) errorSpan.textContent = "";
+            }
+
+            let workingDays = 0;
+            let d = new Date(start);
+
+            while (d <= end) {
+                const day = d.getDay();
+                if (day !== 0 && day !== 6) workingDays++;
+                d.setDate(d.getDate() + 1);
+            }
+
+            let selectedText = "";
+            if (leaveType && leaveType.selectedIndex !== -1) {
+                selectedText = leaveType.options[leaveType.selectedIndex].text.toLowerCase();
+            }
+
+            if (workingDays > 0) {
+                if (selectedText.includes("day off") || selectedText.includes("half")) {
+                    workingDays -= 0.5;
+                    if (workingDays < 0) workingDays = 0;
+                }
+            }
+
+            totalDaysInput.value = workingDays;
+        }
+
+        function validateBeforeSubmit(e) {
+            const isAdmin = @isAdmin.ToString().ToLower();
+
+            if (!isAdmin) {
+                const reason = document.getElementById("Reason");
+                const err = document.getElementById("reasonError");
+
+                if (reason) {
+                    const v = (reason.value || "").trim();
+                    if (err) err.textContent = "";
+
+                    if (v.length === 0) {
+                        if (err) err.textContent = "Reason is required.";
+                        reason.focus();
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            } else {
+                const status = document.getElementById("Status");
+                const remark = document.getElementById("ApproverRemark");
+                const err = document.getElementById("approverRemarkError");
+
+                if (status && remark) {
+                    const s = (status.value || "").toLowerCase();
+                    const needRemark = (s === "approved" || s === "rejected");
+
+                    if (err) err.textContent = "";
+
+                    if (needRemark) {
+                        const rv = (remark.value || "").trim();
+                        if (rv.length === 0) {
+                            if (err) err.textContent = "Approver Remark is required when approving or rejecting.";
+                            remark.focus();
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        document.getElementById("StartDate")?.addEventListener("change", calculateTotalDays);
+        document.getElementById("EndDate")?.addEventListener("change", calculateTotalDays);
+        document.getElementById("LeaveTypeId")?.addEventListener("change", calculateTotalDays);
+        document.getElementById("editLeaveForm")?.addEventListener("submit", validateBeforeSubmit);
+
+        const btnCancelLeave = document.getElementById("btnCancelLeave");
+        const cancelForm = document.getElementById("cancelForm");
+
+        if (btnCancelLeave && cancelForm) {
+            btnCancelLeave.addEventListener("click", function () {
+                Swal.fire({
+                    title: "Confirm cancellation?",
+                    html: `
+                        <div style="text-align:left">
+                            <div>This application will not be able to proceed after cancellation.</div>
+                            <div class="mt-2">The status will become <span class="badge bg-secondary">Cancelled</span>.</div>
+                        </div>
+                    `,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Confirm",
+                    cancelButtonText: "No",
+                    reverseButtons: true,
+                    focusCancel: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        cancelForm.submit();
+                    }
+                });
+            });
+        }
+    </script>
+}

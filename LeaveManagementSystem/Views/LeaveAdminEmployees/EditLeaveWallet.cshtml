@@ -1,0 +1,259 @@
+﻿@model LeaveManagementSystem.ViewModels.EmployeeLeaveWalletEditVM
+
+@{
+    ViewData["Title"] = "Edit Leave Wallet";
+}
+
+<div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h2 class="mb-1">Edit Leave Wallet</h2>
+            <div class="text-muted">
+                Modify all vacation days for this employee at once, including the amount used and the remaining amount.
+            </div>
+        </div>
+        <a class="btn btn-outline-secondary" asp-action="Index">← Back</a>
+    </div>
+
+    <form asp-action="EditLeaveWallet" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+        <!-- Employee Info -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-3">Employee Info</h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Name</label>
+                        <input class="form-control" value="@Model.Name" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" value="@Model.Email" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Department</label>
+                        <input class="form-control" value="@Model.Department" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Employment Type</label>
+                        <input class="form-control" value="@Model.EmploymentType" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Join Date</label>
+                        <input class="form-control" value="@(Model.JoinDate?.ToString("dd/MM/yyyy") ?? "-")" readonly />
+                    </div>
+
+                    <div class="col-md-6 pt-2">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" asp-for="IsAdmin" id="IsAdmin" />
+                            <label class="form-check-label" asp-for="IsAdmin">Is Admin</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 pt-2">
+                        <label class="form-label">Role (auto)</label>
+                        <input class="form-control" id="RolePreview" value="@(Model.IsAdmin ? "Administrator" : "Staff")" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave Wallet -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-3">Leave Wallet</h6>
+
+                <div class="row g-3">
+
+                    <!-- Annual -->
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="fw-semibold mb-2">Annual Leave</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Entitlement</label>
+                                    <input asp-for="AnnualLeaveEntitlement" class="form-control" />
+                                    <span asp-validation-for="AnnualLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Used</label>
+                                    <input asp-for="AnnualLeaveUsed" class="form-control" />
+                                    <span asp-validation-for="AnnualLeaveUsed" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Balance (auto)</label>
+                                    <input asp-for="AnnualLeaveBalance" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sick -->
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="fw-semibold mb-2">Medical (Sick) Leave</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Entitlement</label>
+                                    <input asp-for="SickLeaveEntitlement" class="form-control" />
+                                    <span asp-validation-for="SickLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Used</label>
+                                    <input asp-for="SickLeaveUsed" class="form-control" />
+                                    <span asp-validation-for="SickLeaveUsed" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Balance (auto)</label>
+                                    <input asp-for="SickLeaveBalance" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hospitalisation -->
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="fw-semibold mb-2">Hospitalisation Leave</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Entitlement</label>
+                                    <input asp-for="HospitalisationLeaveEntitlement" class="form-control" />
+                                    <span asp-validation-for="HospitalisationLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Used</label>
+                                    <input asp-for="HospitalisationLeaveUsed" class="form-control" />
+                                    <span asp-validation-for="HospitalisationLeaveUsed" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Balance (auto)</label>
+                                    <input asp-for="HospitalisationLeaveBalance" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maternity -->
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="fw-semibold mb-2">Maternity Leave</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Entitlement</label>
+                                    <input asp-for="MaternityLeaveEntitlement" class="form-control" />
+                                    <span asp-validation-for="MaternityLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Used</label>
+                                    <input asp-for="MaternityLeaveUsed" class="form-control" />
+                                    <span asp-validation-for="MaternityLeaveUsed" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Balance (auto)</label>
+                                    <input asp-for="MaternityLeaveBalance" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paternity -->
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="fw-semibold mb-2">Paternity Leave</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Entitlement</label>
+                                    <input asp-for="PaternityLeaveEntitlement" class="form-control" />
+                                    <span asp-validation-for="PaternityLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Used</label>
+                                    <input asp-for="PaternityLeaveUsed" class="form-control" />
+                                    <span asp-validation-for="PaternityLeaveUsed" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Balance (auto)</label>
+                                    <input asp-for="PaternityLeaveBalance" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bereavement -->
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="fw-semibold mb-2">Bereavement Leave</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Entitlement</label>
+                                    <input asp-for="BereavementLeaveEntitlement" class="form-control" />
+                                    <span asp-validation-for="BereavementLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Used</label>
+                                    <input asp-for="BereavementLeaveUsed" class="form-control" />
+                                    <span asp-validation-for="BereavementLeaveUsed" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Balance (auto)</label>
+                                    <input asp-for="BereavementLeaveBalance" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unpaid -->
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <div class="fw-semibold mb-2">Unpaid Leave</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Entitlement</label>
+                                    <input asp-for="UnpaidLeaveEntitlement" class="form-control" />
+                                    <span asp-validation-for="UnpaidLeaveEntitlement" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Used</label>
+                                    <input asp-for="UnpaidLeaveUsed" class="form-control" />
+                                    <span asp-validation-for="UnpaidLeaveUsed" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Balance (auto)</label>
+                                    <input asp-for="UnpaidLeaveBalance" class="form-control" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function updateRolePreview() {
+            const isAdmin = document.getElementById("IsAdmin");
+            const role = document.getElementById("RolePreview");
+            if (!isAdmin || !role) return;
+            role.value = isAdmin.checked ? "Administrator" : "Staff";
+        }
+
+        document.getElementById("IsAdmin")?.addEventListener("change", updateRolePreview);
+        window.addEventListener("load", updateRolePreview);
+    </script>
+}
